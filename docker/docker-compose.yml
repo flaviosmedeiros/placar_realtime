@@ -1,0 +1,121 @@
+services:
+  # PostgreSQL 15 - Banco de dados principal
+  postgres:
+    image: postgres:15-alpine
+    container_name: placar-postgres
+    environment:
+      POSTGRES_DB: placar_db
+      POSTGRES_USER: placar_user
+      POSTGRES_PASSWORD: placar_pass
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placar_user -d placar_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 7 - Cache distribuído
+  redis:
+    image: redis:7-alpine
+    container_name: placar-redis
+    command: redis-server --appendonly yes --requirepass redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ 3.12 - Message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: placar-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq_user
+      RABBITMQ_DEFAULT_PASS: rabbitmq_pass
+      RABBITMQ_DEFAULT_VHOST: placar_vhost
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin 4 - Interface web para PostgreSQL (opcional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: placar-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@placar.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - placar-network
+    depends_on:
+      - postgres
+
+  # Payara Server 6 - Servidor de aplicação Jakarta EE
+  payara:
+    image: payara/server-full:6.2023.5-jdk17
+    container_name: placar-payara
+    environment:
+      PAYARA_ADMIN_USER: admin
+      PAYARA_ADMIN_PASSWORD: admin123
+      PAYARA_DOMAIN_NAME: domain1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8080:8080"
+      - "4848:4848"
+    volumes:
+      - payara_domain_data:/opt/payara/appserver/glassfish/domains
+      - ./payara/deployments:/opt/payara/deployments
+    networks:
+      - placar-network
+
+networks:
+  placar-network:
+    driver: bridge
+    name: placar-network
+
+volumes:
+  postgres_data:
+    name: placar-postgres-data
+  redis_data:
+    name: placar-redis-data
+  rabbitmq_data:
+    name: placar-rabbitmq-data
+  rabbitmq_log:
+    name: placar-rabbitmq-log
+  pgadmin_data:
+    name: placar-pgadmin-data
+  payara_domain_data:
+    name: placar-payara-domain
