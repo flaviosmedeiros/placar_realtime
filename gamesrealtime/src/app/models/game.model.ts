@@ -1,7 +1,7 @@
 export enum GameStatus {
   NAO_INICIADO = 'NAO_INICIADO',
   EM_ANDAMENTO = 'EM_ANDAMENTO',
-  ENCERRADO = 'ENCERRADO'
+  FINALIZADO = 'FINALIZADO'
 }
 
 export interface game {
@@ -11,14 +11,7 @@ export interface game {
   placarA: number;
   placarB: number;
   status: string;
+  tempoDeJogo: number;
   dataHoraInicioPartida: Date;
   dataHoraEncerramento: Date;
-}
-
-export interface logGame {
-  id: string;
-  descricao: string;
-  operacao: string;
-  minutoPartida: number;
-  dataHora: Date;
 }

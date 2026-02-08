@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { game, logGame } from '../models/game.model';
+import { game } from '../models/game.model';
 
 type GameUpdate = Partial<game> & { id: string };
 
@@ -15,26 +15,25 @@ type GameSseHandlers = {
   providedIn: 'root'
 })
 export class GameSseService {
-  private readonly apiBaseUrl = 'http://localhost:8585';
+  private readonly apiBaseUrl = 'http://localhost:8585/consumer/api';
   private readonly sseEndpoints = {
-    novos: '/sse/jogos/novos',
-    inicio: '/sse/jogos/inicio',
-    placar: '/sse/jogos/placar',
-    encerrado: '/sse/jogos/encerrado'
+    novos: '/sse/games/novos',
+    inicio: '/sse/games/inicio',
+    placar: '/sse/games/placar',
+    encerrado: '/sse/games/encerrado'
   };
-  private readonly logsEndpoint = '/jogos/:id/logs';
   private sources: EventSource[] = [];
 
-  constructor(private readonly zone: NgZone) {}
+  constructor(private readonly zone: NgZone) { }
 
   connect(handlers: GameSseHandlers): void {
     this.close();
 
     this.sources = [
-      this.createSource(this.sseEndpoints.novos, handlers.onNovo, handlers.onError),
-      this.createSource(this.sseEndpoints.inicio, handlers.onInicio, handlers.onError),
-      this.createSource(this.sseEndpoints.placar, handlers.onPlacar, handlers.onError),
-      this.createSource(this.sseEndpoints.encerrado, handlers.onEncerrado, handlers.onError)
+      this.createSource('novos', this.sseEndpoints.novos, handlers.onNovo, handlers.onError),
+      this.createSource('inicio', this.sseEndpoints.inicio, handlers.onInicio, handlers.onError),
+      this.createSource('placar', this.sseEndpoints.placar, handlers.onPlacar, handlers.onError),
+      this.createSource('encerrado', this.sseEndpoints.encerrado, handlers.onEncerrado, handlers.onError)
     ];
   }
 
@@ -43,38 +42,33 @@ export class GameSseService {
     this.sources = [];
   }
 
-  async fetchLogs(gameId: string): Promise<logGame[]> {
-    const url = `${this.apiBaseUrl}${this.logsEndpoint.replace(':id', gameId)}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error('Nao foi possivel carregar os logs da partida.');
-    }
-
-    const payload = (await response.json()) as logGame[];
-    return payload.map((log) => ({
-      ...log,
-      dataHora: this.parseDate(log.dataHora) ?? new Date('')
-    }));
-  }
-
   private createSource(
+    channel: string,
     endpoint: string,
     handler: (update: GameUpdate) => void,
     onError?: (event: Event) => void
   ): EventSource {
-    const source = new EventSource(`${this.apiBaseUrl}${endpoint}`);
+    const url = `${this.apiBaseUrl}${endpoint}`;
+    const source = new EventSource(url);
 
-    source.onmessage = (event) => {
+    source.onopen = () => {
+      console.info(`[SSE:${channel}] conectado em ${url}`);
+    };
+
+    // Use addEventListener to listen for named events matching the channel name
+    source.addEventListener(channel, (event: MessageEvent) => {
       const update = this.parseUpdate(event.data);
       if (!update) {
+        console.warn(`[SSE:${channel}] mensagem ignorada (payload invalido)`, event.data);
         return;
       }
 
+      console.info(`[SSE:${channel}] evento recebido`, update);
       this.zone.run(() => handler(update));
-    };
+    });
 
     source.onerror = (event) => {
+      console.error(`[SSE:${channel}] erro na conexao`, event);
       if (onError) {
         this.zone.run(() => onError(event));
       }

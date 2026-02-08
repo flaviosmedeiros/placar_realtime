@@ -1,7 +1,6 @@
 <div class="app">
   <header class="hero">
     <div class="hero-copy">
-      <p class="eyebrow">SSE · Futebol</p>
       <h1>Games Realtime</h1>
       <p class="subtitle">
         Acompanhe partidas em tempo real com atualizacoes vindas da API Java via SSE.
@@ -25,185 +24,142 @@
 
   <div class="boards">
     <section class="board board--new">
-    <div class="board-header">
-      <div>
-        <p class="board-kicker">Nao iniciados</p>
-        <h2>Jogos novos</h2>
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Nao iniciados</p>
+          <h2>Jogos novos</h2>
+        </div>
+        <span class="count">{{ jogosNovos().length }}</span>
       </div>
-      <span class="count">{{ jogosNovos().length }}</span>
-    </div>
-    <div class="board-body">
-      @if (jogosNovos().length === 0) {
+      <div class="board-body">
+        @if (jogosNovos().length === 0) {
         <p class="empty">Nenhum jogo aguardando inicio.</p>
-      } @else {
+        } @else {
         <div class="cards">
           @for (jogo of jogosNovos(); track jogo.id) {
-            <article class="game-card">
-              <div class="game-head">
-                <div class="teams">
-                  <span class="team">{{ jogo.timeA }}</span>
-                  <span class="versus">x</span>
-                  <span class="team">{{ jogo.timeB }}</span>
-                </div>
-                <span class="status-badge status-badge--novo">{{ labelStatus(jogo.status) }}</span>
+          <article class="game-card">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <div class="score">
-                <span>{{ jogo.placarA }}</span>
-                <span class="score-divider">x</span>
-                <span>{{ jogo.placarB }}</span>
+              <span class="status-badge status-badge--novo">{{ jogo.status }}</span>
+            </div>
+            <div class="score">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Inicio previsto</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
               </div>
-              <div class="meta">
-                <div class="meta-item">
-                  <span class="meta-label">Inicio previsto</span>
-                  <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Status</span>
-                  <span class="meta-value">{{ labelStatus(jogo.status) }}</span>
-                </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ jogo.status }}</span>
               </div>
-            </article>
+            </div>
+          </article>
           }
         </div>
-      }
-    </div>
+        }
+      </div>
     </section>
 
     <section class="board board--live">
-    <div class="board-header">
-      <div>
-        <p class="board-kicker">Partidas ao vivo</p>
-        <h2>Jogos em andamento</h2>
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Partidas ao vivo</p>
+          <h2>Jogos em andamento</h2>
+        </div>
+        <span class="count">{{ jogosEmAndamento().length }}</span>
       </div>
-      <span class="count">{{ jogosEmAndamento().length }}</span>
-    </div>
-    <div class="board-body">
-      @if (jogosEmAndamento().length === 0) {
+      <div class="board-body">
+        @if (jogosEmAndamento().length === 0) {
         <p class="empty">Nenhuma partida em andamento.</p>
-      } @else {
+        } @else {
         <div class="cards">
           @for (jogo of jogosEmAndamento(); track jogo.id) {
-            <article class="game-card game-card--live">
-              <div class="game-head">
-                <div class="teams">
-                  <span class="team">{{ jogo.timeA }}</span>
-                  <span class="versus">x</span>
-                  <span class="team">{{ jogo.timeB }}</span>
-                </div>
-                <span class="status-badge status-badge--live">{{ labelStatus(jogo.status) }}</span>
+          <article class="game-card game-card--live">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <div class="score score--live">
-                <span>{{ jogo.placarA }}</span>
-                <span class="score-divider">x</span>
-                <span>{{ jogo.placarB }}</span>
+              <span class="status-badge status-badge--live">{{ jogo.status }}</span>
+            </div>
+            <div class="score score--live">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Tempo de jogo</span>
+                <span class="meta-value">{{ formatarTempoDeJogo(jogo) }}</span>
               </div>
-              <div class="meta">
-                <div class="meta-item">
-                  <span class="meta-label">Inicio</span>
-                  <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Status</span>
-                  <span class="meta-value">{{ labelStatus(jogo.status) }}</span>
-                </div>
+              <div class="meta-item">
+                <span class="meta-label">Inicio</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
               </div>
-            </article>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ jogo.status }}</span>
+              </div>
+            </div>
+          </article>
           }
         </div>
-      }
-    </div>
+        }
+      </div>
     </section>
 
     <section class="board board--closed">
-    <div class="board-header">
-      <div>
-        <p class="board-kicker">Finalizados</p>
-        <h2>Jogos encerrados</h2>
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Finalizados</p>
+          <h2>Jogos encerrados</h2>
+        </div>
+        <span class="count">{{ jogosEncerrados().length }}</span>
       </div>
-      <span class="count">{{ jogosEncerrados().length }}</span>
-    </div>
-    <div class="board-body">
-      @if (jogosEncerrados().length === 0) {
+      <div class="board-body">
+        @if (jogosEncerrados().length === 0) {
         <p class="empty">Nenhuma partida encerrada.</p>
-      } @else {
+        } @else {
         <div class="cards">
           @for (jogo of jogosEncerrados(); track jogo.id) {
-            <article class="game-card game-card--closed">
-              <div class="game-head">
-                <div class="teams">
-                  <span class="team">{{ jogo.timeA }}</span>
-                  <span class="versus">x</span>
-                  <span class="team">{{ jogo.timeB }}</span>
-                </div>
-                <span class="status-badge status-badge--closed">{{ labelStatus(jogo.status) }}</span>
+          <article class="game-card game-card--closed">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <div class="score">
-                <span>{{ jogo.placarA }}</span>
-                <span class="score-divider">x</span>
-                <span>{{ jogo.placarB }}</span>
+              <span class="status-badge status-badge--closed">{{ jogo.status }}</span>
+            </div>
+            <div class="score">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Encerramento</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraEncerramento) }}</span>
               </div>
-              <div class="meta">
-                <div class="meta-item">
-                  <span class="meta-label">Encerramento</span>
-                  <span class="meta-value">{{ formatarData(jogo.dataHoraEncerramento) }}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Status</span>
-                  <span class="meta-value">{{ labelStatus(jogo.status) }}</span>
-                </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ jogo.status }}</span>
               </div>
-              <button class="log-button" type="button" (click)="abrirLogs(jogo)">Ver logs</button>
-            </article>
+            </div>
+          </article>
           }
         </div>
-      }
-    </div>
+        }
+      </div>
     </section>
   </div>
 </div>
-
-@if (modalAberto()) {
-  <div class="modal-overlay" (click)="fecharModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <p class="modal-kicker">Detalhes da partida</p>
-          <h3>Logs do jogo</h3>
-        </div>
-        <button class="icon-button" type="button" (click)="fecharModal()">Fechar</button>
-      </div>
-      <div class="modal-info">
-        @if (jogoSelecionado()) {
-          <p>
-            {{ jogoSelecionado()?.timeA }} x {{ jogoSelecionado()?.timeB }}
-            · {{ formatarData(jogoSelecionado()?.dataHoraEncerramento) }}
-          </p>
-        }
-      </div>
-      <div class="modal-body">
-        @if (logsCarregando()) {
-          <p class="empty">Carregando logs...</p>
-        } @else if (logsErro()) {
-          <p class="empty">{{ logsErro() }}</p>
-        } @else if (logsSelecionados().length === 0) {
-          <p class="empty">Nenhum log registrado.</p>
-        } @else {
-          <div class="logs">
-            @for (log of logsSelecionados(); track log.id) {
-              <div class="log-item">
-                <div class="log-main">
-                  <p class="log-desc">{{ log.descricao }}</p>
-                  <p class="log-op">{{ log.operacao }}</p>
-                </div>
-                <div class="log-meta">
-                  <span>Minuto {{ log.minutoPartida }}</span>
-                  <span>{{ formatarData(log.dataHora) }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  </div>
-}
