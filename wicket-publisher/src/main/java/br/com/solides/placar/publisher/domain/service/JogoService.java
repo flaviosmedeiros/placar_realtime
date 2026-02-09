@@ -141,8 +141,38 @@ public class JogoService {
      * @return lista de todos os jogos
      */
     public List<Jogo> listarTodos() {
-        log.debug("Listando todos os jogos");
-        return jogoRepository.findAll();
+        log.info("=== JogoService.listarTodos() iniciado ===");
+        
+        try {
+            log.debug("Verificando injeção de jogoRepository: {}", jogoRepository != null ? "OK" : "NULL");
+            
+            if (jogoRepository == null) {
+                log.error("ERRO CRÍTICO: JogoRepository NÃO foi injetado!");
+                throw new IllegalStateException("JogoRepository não injetado");
+            }
+            
+            log.debug("Chamando jogoRepository.findAll()...");
+            List<Jogo> jogos = jogoRepository.findAll();
+            
+            log.info("Jogos retornados do repository: {}", jogos != null ? jogos.size() : "NULL");
+            
+            if (jogos != null && !jogos.isEmpty()) {
+                log.debug("Primeiro jogo: ID={}, TimeA={}, TimeB={}, Status={}", 
+                    jogos.get(0).getId(), 
+                    jogos.get(0).getTimeA(), 
+                    jogos.get(0).getTimeB(),
+                    jogos.get(0).getStatus());
+            }
+            
+            log.info("=== JogoService.listarTodos() finalizado com sucesso ===");
+            return jogos;
+            
+        } catch (Exception e) {
+            log.error("=== ERRO em JogoService.listarTodos() ===", e);
+            log.error("Tipo: {}", e.getClass().getName());
+            log.error("Mensagem: {}", e.getMessage());
+            throw new RuntimeException("Erro ao listar todos os jogos", e);
+        }
     }
 
     /**
