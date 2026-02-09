@@ -103,6 +103,7 @@ app:
     heartbeat: 10000
     allowed-origins:
       - http://localhost:4200
+      - http://localhost:8585
     endpoints:
       novos: /novos
       inicio: /inicio
@@ -112,5 +113,3 @@ app:
 
 server:
   port: 8585
-  servlet:
-    context-path: /consumer/api

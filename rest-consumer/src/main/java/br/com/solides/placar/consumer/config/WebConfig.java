@@ -20,14 +20,14 @@ public class WebConfig implements WebMvcConfigurer {
         List<String> allowedOrigins = properties.getSse().getAllowedOrigins();
         String[] origins = allowedOrigins.toArray(new String[0]);
 
-        registry.addMapping("/sse/**")
+        registry.addMapping("/consumer/api/sse/**")
             .allowedOrigins(origins)
             .allowedMethods("GET")
             .allowCredentials(false);
 
-        registry.addMapping("/games/**")
+        registry.addMapping("/consumer/api/games/**")
             .allowedOrigins(origins)
-            .allowedMethods("GET")
+            .allowedMethods("GET", "POST")
             .allowCredentials(false);
     }
 }

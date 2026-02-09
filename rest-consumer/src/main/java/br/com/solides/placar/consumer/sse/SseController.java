@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/sse/games")
+@RequestMapping("/consumer/api/sse/games")
 public class SseController {
 
     private static final Logger logger = LoggerFactory.getLogger(SseController.class);
