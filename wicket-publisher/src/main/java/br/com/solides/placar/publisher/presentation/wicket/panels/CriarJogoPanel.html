@@ -1,0 +1,98 @@
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+    <h2>➕ Criar Novo Jogo</h2>
+    
+    <div wicket:id="feedback" class="feedback"></div>
+    
+    <form wicket:id="criarJogoForm" class="criar-jogo-form">
+        <div class="form-group">
+            <label>Time A:</label>
+            <input wicket:id="timeA" type="text" placeholder="Nome do Time A" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Time B:</label>
+            <input wicket:id="timeB" type="text" placeholder="Nome do Time B" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Data/Hora (opcional):</label>
+            <input wicket:id="dataHoraStr" type="text" placeholder="Deixe vazio para usar data atual + 1h" />
+            <small>Formato: YYYY-MM-DD HH:MM (exemplo: 2026-01-30 18:00)</small>
+        </div>
+        
+        <button wicket:id="submitButton" type="submit" class="btn-primary">Criar Jogo</button>
+    </form>
+
+    <style>
+        .feedback {
+            margin-bottom: 15px;
+        }
+        
+        .feedback .feedbackPanelERROR {
+            color: #e74c3c;
+            background-color: #fadbd8;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .feedback .feedbackPanelINFO {
+            color: #27ae60;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .criar-jogo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group small {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        
+        .btn-primary {
+            padding: 12px 24px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #229954;
+        }
+    </style>
+</wicket:panel>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placar Realtime - Wicket Publisher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .links {
+            margin-top: 30px;
+        }
+        .links a {
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .links a:hover {
+            background-color: #0056b3;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Placar Realtime - Sistema de Gestão</h1>
+        
+        <p>Bem-vindo ao sistema de gerenciamento de placares em tempo real!</p>
+        
+        <div class="links">
+            <a href="/wicket-publisher/app">📊 Interface Wicket (Administrativa)</a>
+            <a href="/wicket-publisher/api/openapi">📄 API Documentation (OpenAPI)</a>
+        </div>
+        
+        <div class="info">
+            <h3>🔗 Recursos Disponíveis:</h3>
+            <ul>
+                <li><strong>Interface Wicket:</strong> /app - Interface administrativa para CRUD de jogos</li>
+                <li><strong>API REST:</strong> /api - Endpoints para integração</li>
+                <li><strong>OpenAPI Spec:</strong> /api/openapi - Documentação da API</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>📡 Arquitetura:</h3>
+            <p>Esta aplicação é o <strong>Publisher</strong> do sistema, responsável por:</p>
+            <ul>
+                <li>Gerenciar CRUD de jogos (criar, atualizar placar, encerrar)</li>
+                <li>Persistir dados no PostgreSQL</li>
+                <li>Publicar eventos no RabbitMQ quando placares são atualizados</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
