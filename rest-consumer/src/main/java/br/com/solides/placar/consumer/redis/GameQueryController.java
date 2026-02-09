@@ -23,7 +23,7 @@ public class GameQueryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlacarAtualizadoEvent> getById(@PathVariable Long id) {
+    public ResponseEntity<PlacarAtualizadoEvent> getById(@PathVariable("id") Long id) {
         PlacarAtualizadoEvent event = cacheService.findById(id);
         if (event == null) {
             return ResponseEntity.notFound().build();
