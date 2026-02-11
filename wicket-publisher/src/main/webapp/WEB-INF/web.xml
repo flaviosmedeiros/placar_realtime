@@ -2,57 +2,61 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
-                             https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
-         version="5.0">
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
 
-    <display-name>Placar Realtime - Wicket Publisher</display-name>
-    <description>Aplicação administrativa para gerenciamento de jogos com Apache Wicket</description>
+    <display-name>Wicket Publisher</display-name>
+    <description>Módulo Wicket para publicação de dados do placar em tempo real</description>
 
     <!-- Context Parameters -->
     <context-param>
         <param-name>configuration</param-name>
-        <param-value>deployment</param-value>
+        <param-value>development</param-value>
     </context-param>
 
-    <!-- Wicket Filter -->
+    <!-- CDI Configuration -->
+    <context-param>
+        <param-name>jakarta.enterprise.inject.scan.implicit</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Wicket Application Filter -->
     <filter>
-        <filter-name>WicketApplication</filter-name>
+        <filter-name>wicket.placar-realtime</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
         <init-param>
             <param-name>applicationClassName</param-name>
-            <param-value>br.com.solides.placar.publisher.presentation.wicket.WicketApplication</param-value>
-        </init-param>
-        <init-param>
-            <param-name>filterMappingUrlPattern</param-name>
-            <param-value>/app/*</param-value>
+            <param-value>br.com.solides.placar.wicket.WicketPublisherApplication</param-value>
         </init-param>
     </filter>
 
     <filter-mapping>
-        <filter-name>WicketApplication</filter-name>
-        <url-pattern>/app/*</url-pattern>
+        <filter-name>wicket.placar-realtime</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- JAX-RS Application -->
-    <servlet>
-        <servlet-name>JakartaRestServlet</servlet-name>
-        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>jakarta.ws.rs.Application</param-name>
-            <param-value>br.com.solides.placar.publisher.presentation.rest.JaxrsApplication</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <!-- Security Constraints -->
+    <security-constraint>
+        <display-name>Secure Application</display-name>
+        <web-resource-collection>
+            <web-resource-name>Protected Area</web-resource-name>
+            <url-pattern>/admin/*</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <!-- Remove auth-constraint for now to keep it simple -->
+    </security-constraint>
 
-    <servlet-mapping>
-        <servlet-name>JakartaRestServlet</servlet-name>
-        <url-pattern>/api/*</url-pattern>
-    </servlet-mapping>
+    <!-- Error Pages -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error/404.html</location>
+    </error-page>
 
-    <!-- Welcome File -->
-    <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-    </welcome-file-list>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error/500.html</location>
+    </error-page>
 
     <!-- Session Configuration -->
     <session-config>
@@ -61,5 +65,37 @@
             <http-only>true</http-only>
             <secure>false</secure>
         </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
+
+    <!-- Welcome Files -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- MIME Types for Static Resources -->
+    <mime-mapping>
+        <extension>css</extension>
+        <mime-type>text/css</mime-type>
+    </mime-mapping>
+    
+    <mime-mapping>
+        <extension>js</extension>
+        <mime-type>application/javascript</mime-type>
+    </mime-mapping>
+    
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type>
+    </mime-mapping>
+
+    <!-- Resource References -->
+    <resource-ref>
+        <description>Primary DataSource</description>
+        <res-ref-name>jdbc/PlacarDS</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
 </web-app>

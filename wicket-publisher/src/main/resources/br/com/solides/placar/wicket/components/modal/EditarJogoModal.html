@@ -1,0 +1,141 @@
+<wicket:panel>
+    <!-- Modal -->
+    <div class="modal fade" id="modalEditarJogo" tabindex="-1" aria-labelledby="modalEditarJogoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalEditarJogoLabel">
+                        <i class="bi bi-pencil-square"></i>
+                        Editar Jogo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form wicket:id="formEditarJogo">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- Time A -->
+                            <div class="col-md-6">
+                                <label for="timeA" class="form-label">
+                                    <i class="bi bi-shield-fill text-primary"></i>
+                                    Time A *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeA" 
+                                       placeholder="Nome do Time A"
+                                       required>
+                            </div>
+                            
+                            <!-- Time B -->
+                            <div class="col-md-6">
+                                <label for="timeB" class="form-label">
+                                    <i class="bi bi-shield-fill text-danger"></i>
+                                    Time B *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeB" 
+                                       placeholder="Nome do Time B"
+                                       required>
+                            </div>
+                            
+                            <!-- Placar A -->
+                            <div class="col-md-3">
+                                <label for="placarA" class="form-label">
+                                    <i class="bi bi-trophy text-primary"></i>
+                                    Placar A
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       wicket:id="placarA" 
+                                       min="0"
+                                       placeholder="0">
+                            </div>
+                            
+                            <!-- Placar B -->
+                            <div class="col-md-3">
+                                <label for="placarB" class="form-label">
+                                    <i class="bi bi-trophy text-danger"></i>
+                                    Placar B
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       wicket:id="placarB" 
+                                       min="0"
+                                       placeholder="0">
+                            </div>
+                            
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-flag text-info"></i>
+                                    Status *
+                                </label>
+                                <select class="form-select" wicket:id="status" required>
+                                    <option value="">Selecione o status</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Data e Hora da Partida -->
+                            <div class="col-md-6">
+                                <label for="dataPartidaStr" class="form-label">
+                                    <i class="bi bi-calendar3 text-success"></i>
+                                    Data da Partida *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="dataPartidaStr" 
+                                       placeholder="YYYY-MM-DD"
+                                       pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                                       required>
+                                <div class="form-text">Data prevista para o jogo (formato: YYYY-MM-DD)</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="horaPartidaStr" class="form-label">
+                                    <i class="bi bi-clock text-success"></i>
+                                    Hora da Partida *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="horaPartidaStr" 
+                                       placeholder="HH:MM"
+                                       pattern="[0-9]{2}:[0-9]{2}"
+                                       required>
+                                <div class="form-text">Horário previsto para início do jogo (formato: HH:MM)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informações sobre regras -->
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Atenção:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Jogos <strong>Finalizados</strong> não podem ter status alterado</li>
+                                <li>Placares só podem ser alterados em jogos <strong>Em Andamento</strong></li>
+                                <li>Transições de status seguem regras específicas de negócio</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                wicket:id="botaoCancelar"
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-warning" 
+                                wicket:id="botaoSalvar">
+                            <i class="bi bi-check-circle"></i>
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</wicket:panel>

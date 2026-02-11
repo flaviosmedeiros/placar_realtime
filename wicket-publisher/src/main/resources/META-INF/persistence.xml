@@ -1,41 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="3.0" 
-             xmlns="https://jakarta.ee/xml/ns/persistence"
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
-                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
 
     <persistence-unit name="placar-pu" transaction-type="JTA">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <description>Unidade de Persistência para Sistema de Placar Realtime</description>
+        
+        <!-- Datasource JNDI configurado no Payara -->
         <jta-data-source>jdbc/placarDS</jta-data-source>
         
-        <!-- Entities -->
-        <class>br.com.solides.placar.publisher.domain.model.Jogo</class>
+        <!-- Entidades do domínio -->
+        <class>br.com.solides.placar.entity.Jogo</class>
         
-        <!-- Scan for entities -->
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        
+        <!-- Configurações do EclipseLink para DDL automático -->
         <properties>
-            <!-- Hibernate Configuration -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.use_sql_comments" value="true"/>
+            <!-- Dialeto PostgreSQL específico -->
+            <property name="eclipselink.target-database" value="PostgreSQL"/>
             
-            <!-- Schema Management -->
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <property name="hibernate.default_schema" value="placar"/>
+            <!-- Geração automática de DDL - EclipseLink -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+            <property name="eclipselink.create-ddl-jdbc-file-name" value="create-schema.sql"/>
+            <property name="eclipselink.drop-ddl-jdbc-file-name" value="drop-schema.sql"/>
             
-            <!-- Connection Pool (managed by Payara) -->
-            <property name="hibernate.connection.provider_class" value="org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl"/>
+            <!-- Schema padrão -->
+            <property name="eclipselink.default-schema" value="placar"/>
             
-            <!-- Performance -->
-            <property name="hibernate.jdbc.batch_size" value="20"/>
-            <property name="hibernate.order_inserts" value="true"/>
-            <property name="hibernate.order_updates" value="true"/>
+            <!-- Configurações de logging -->
+            <property name="eclipselink.logging.level" value="INFO"/>
+            <property name="eclipselink.logging.level.sql" value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
             
-            <!-- Logging -->
-            <property name="hibernate.generate_statistics" value="false"/>
+            <!-- Configurações de cache -->
+            <property name="eclipselink.cache.shared.default" value="false"/>
+            
+            <!-- Configurações de performance -->
+            <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
+            <property name="eclipselink.jdbc.cache-statements" value="true"/>
+            
+            <!-- Timezone para timestamps -->
+            <property name="eclipselink.temporal.mutable" value="true"/>
         </properties>
     </persistence-unit>
 </persistence>

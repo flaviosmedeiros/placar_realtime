@@ -1,0 +1,106 @@
+<wicket:panel>
+    <!-- Modal -->
+    <div class="modal fade" id="modalCriarJogo" tabindex="-1" aria-labelledby="modalCriarJogoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalCriarJogoLabel">
+                        <i class="bi bi-plus-circle"></i>
+                        Adicionar Novo Jogo
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form wicket:id="formCriarJogo">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- Time A -->
+                            <div class="col-md-6">
+                                <label for="timeA" class="form-label">
+                                    <i class="bi bi-shield-fill text-primary"></i>
+                                    Time A *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeA" 
+                                       placeholder="Nome do Time A"
+                                       required>
+                                <div class="form-text">Nome completo do primeiro time</div>
+                            </div>
+                            
+                            <!-- Time B -->
+                            <div class="col-md-6">
+                                <label for="timeB" class="form-label">
+                                    <i class="bi bi-shield-fill text-danger"></i>
+                                    Time B *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeB" 
+                                       placeholder="Nome do Time B"
+                                       required>
+                                <div class="form-text">Nome completo do segundo time</div>
+                            </div>
+                            
+                            <!-- Data e Hora da Partida -->
+                            <div class="col-md-6">
+                                <label for="dataPartidaStr" class="form-label">
+                                    <i class="bi bi-calendar3 text-success"></i>
+                                    Data da Partida *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="dataPartidaStr" 
+                                       placeholder="YYYY-MM-DD"
+                                       pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                                       required>
+                                <div class="form-text">Data prevista para o jogo (formato: YYYY-MM-DD)</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="horaPartidaStr" class="form-label">
+                                    <i class="bi bi-clock text-success"></i>
+                                    Hora da Partida *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="horaPartidaStr" 
+                                       placeholder="HH:MM"
+                                       pattern="[0-9]{2}:[0-9]{2}"
+                                       required>
+                                <div class="form-text">Horário previsto para início do jogo (formato: HH:MM)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informações adicionais -->
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Informações:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>O jogo será criado com status <strong>Não Iniciado</strong></li>
+                                <li>Os placares iniciarão em <strong>0 x 0</strong></li>
+                                <li>Após criar, você poderá editar os dados se necessário</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                wicket:id="botaoCancelar"
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-primary" 
+                                wicket:id="botaoSalvar">
+                            <i class="bi bi-check-circle"></i>
+                            Salvar Jogo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</wicket:panel>
