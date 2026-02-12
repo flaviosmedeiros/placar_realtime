@@ -1,16 +1,16 @@
 package br.com.solides.placar.wicket.pages;
 
-import br.com.solides.placar.wicket.pages.jogo.JogoListPage;
+import java.time.LocalDateTime;
+
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import br.com.solides.placar.util.DateTimeConstants;
+import br.com.solides.placar.wicket.pages.jogo.JogoListPage;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Página inicial do Wicket Publisher.
@@ -50,7 +50,7 @@ public class HomePage extends WebPage {
         add(new Label("systemInfo", Model.of("Sistema iniciado com sucesso!")));
         
         // Timestamp atual
-        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+        String currentTime = LocalDateTime.now().format(DateTimeConstants.DATETIME_BR_WITH_SECONDS);
         add(new Label("currentTime", Model.of(currentTime)));
         
         // Versão da aplicação

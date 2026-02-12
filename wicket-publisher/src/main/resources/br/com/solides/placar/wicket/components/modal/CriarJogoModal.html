@@ -48,13 +48,9 @@
                                     <i class="bi bi-calendar3 text-success"></i>
                                     Data da Partida *
                                 </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       wicket:id="dataPartidaStr" 
-                                       placeholder="YYYY-MM-DD"
-                                       pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-                                       required>
-                                <div class="form-text">Data prevista para o jogo (formato: YYYY-MM-DD)</div>
+                                <input class="form-control" 
+                                       wicket:id="dataPartida" required>
+                                <div class="form-text">Data prevista para o jogo</div>
                             </div>
                             
                             <div class="col-md-6">
@@ -62,13 +58,9 @@
                                     <i class="bi bi-clock text-success"></i>
                                     Hora da Partida *
                                 </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       wicket:id="horaPartidaStr" 
-                                       placeholder="HH:MM"
-                                       pattern="[0-9]{2}:[0-9]{2}"
-                                       required>
-                                <div class="form-text">Horário previsto para início do jogo (formato: HH:MM)</div>
+                                <input class="form-control" 
+                                       wicket:id="horaPartidaStr" required>
+                                <div class="form-text">Horário previsto para início do jogo</div>
                             </div>
                         </div>
                         

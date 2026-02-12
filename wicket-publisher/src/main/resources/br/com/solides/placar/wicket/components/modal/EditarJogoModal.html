@@ -23,7 +23,6 @@
                                 <input type="text" 
                                        class="form-control" 
                                        wicket:id="timeA" 
-                                       placeholder="Nome do Time A"
                                        required>
                             </div>
                             
@@ -36,7 +35,6 @@
                                 <input type="text" 
                                        class="form-control" 
                                        wicket:id="timeB" 
-                                       placeholder="Nome do Time B"
                                        required>
                             </div>
                             
@@ -46,11 +44,7 @@
                                     <i class="bi bi-trophy text-primary"></i>
                                     Placar A
                                 </label>
-                                <input type="number" 
-                                       class="form-control" 
-                                       wicket:id="placarA" 
-                                       min="0"
-                                       placeholder="0">
+                                <input type="number" class="form-control" wicket:id="placarA" min="0">
                             </div>
                             
                             <!-- Placar B -->
@@ -59,11 +53,7 @@
                                     <i class="bi bi-trophy text-danger"></i>
                                     Placar B
                                 </label>
-                                <input type="number" 
-                                       class="form-control" 
-                                       wicket:id="placarB" 
-                                       min="0"
-                                       placeholder="0">
+                                <input type="number" class="form-control" wicket:id="placarB" min="0">
                             </div>
                             
                             <!-- Status -->
@@ -83,13 +73,9 @@
                                     <i class="bi bi-calendar3 text-success"></i>
                                     Data da Partida *
                                 </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       wicket:id="dataPartidaStr" 
-                                       placeholder="YYYY-MM-DD"
-                                       pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-                                       required>
-                                <div class="form-text">Data prevista para o jogo (formato: YYYY-MM-DD)</div>
+                                <input class="form-control" 
+                                       wicket:id="dataPartida" required>
+                                <div class="form-text">Data prevista para o jogo</div>
                             </div>
                             
                             <div class="col-md-6">
@@ -97,13 +83,9 @@
                                     <i class="bi bi-clock text-success"></i>
                                     Hora da Partida *
                                 </label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       wicket:id="horaPartidaStr" 
-                                       placeholder="HH:MM"
-                                       pattern="[0-9]{2}:[0-9]{2}"
-                                       required>
-                                <div class="form-text">Horário previsto para início do jogo (formato: HH:MM)</div>
+                                <input class="form-control" 
+                                       wicket:id="horaPartidaStr" required>
+                                <div class="form-text">Horário previsto para início do jogo</div>
                             </div>
                         </div>
                         
@@ -114,25 +96,26 @@
                             <ul class="mb-0 mt-2">
                                 <li>Jogos <strong>Finalizados</strong> não podem ter status alterado</li>
                                 <li>Placares só podem ser alterados em jogos <strong>Em Andamento</strong></li>
-                                <li>Transições de status seguem regras específicas de negócio</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" 
-                                class="btn btn-secondary" 
-                                wicket:id="botaoCancelar"
-                                data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle"></i>
-                            Cancelar
-                        </button>
-                        <button type="submit" 
-                                class="btn btn-warning" 
-                                wicket:id="botaoSalvar">
-                            <i class="bi bi-check-circle"></i>
-                            Salvar Alterações
-                        </button>
+                    	<div class="col-12 d-flex gap-3 justify-content-center">
+	                        <button type="button" 
+	                                class="btn btn-secondary" 
+	                                wicket:id="botaoCancelar"
+	                                data-bs-dismiss="modal">
+	                            <i class="bi bi-x-circle"></i>
+	                            Cancelar
+	                        </button>
+	                        <button type="submit" 
+	                                class="btn btn-success" 
+	                                wicket:id="botaoSalvar">
+	                            <i class="bi bi-check-circle"></i>
+	                            Salvar Alterações
+	                        </button>
+                        </div>
                     </div>
                 </form>
             </div>

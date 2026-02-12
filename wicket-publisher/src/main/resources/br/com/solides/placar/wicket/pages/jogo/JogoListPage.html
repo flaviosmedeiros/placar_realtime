@@ -23,7 +23,8 @@
 
     <div class="container">
         <!-- Feedback Panel -->
-        <div wicket:id="feedback" class="feedback-panel">
+        
+        <div wicket:id="feedback" class="feedback-panel alert alert-secondary">
             <!-- Messages will be shown here -->
         </div>
 
@@ -69,13 +70,13 @@
 
 
 						<div class="col-12 d-flex gap-3 justify-content-center">
-							<button type="submit" class="btn btn-primary"
-								wicket:id="botaoBuscar">
-								<i class="bi bi-search"></i> Buscar
+							<button type="submit" class="btn btn-primary" wicket:id="botaoBuscar">
+								<i class="bi bi-search"></i>
+								Buscar
 							</button>
-							<button type="button" class="btn btn-outline-secondary"
-								wicket:id="botaoLimpar">
-								<i class="bi bi-x-circle"></i> Limpar
+							<button type="button" class="btn btn-secondary" wicket:id="botaoLimpar">
+								<i class="bi bi-x-circle"></i>
+								Limpar
 							</button>
 						</div>
 
@@ -88,7 +89,7 @@
 
 
 		<div class="col-12 d-flex mt-5 justify-content-end">
-			<button type="button" class="btn btn-primary btn-lg" wicket:id="botaoAdicionar">
+			<button type="button" class="btn btn-success btn-lg" wicket:id="botaoAdicionar">
 				<i class="bi bi-plus-circle"></i>
 				Adicionar
 			</button>
@@ -128,20 +129,22 @@
                                 <td wicket:id="placarA" class="text-center"></td>
                                 <td wicket:id="placarB" class="text-center"></td>
                                 <td wicket:id="status" class="text-center"></td>
-                                <td wicket:id="dataHoraPartida" class="text-center"></td>                               
-                                <td>
-                                    <div class="btn-group btn-group-sm d-flex gap-1" role="group">
-                                        <a href="#" class="btn btn-primary" 
-                                           wicket:id="botaoEditar" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-danger" 
-                                           wicket:id="botaoExcluir" title="Excluir">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
+                                <td wicket:id="dataHoraPartida" class="text-center"></td>
+                                <td class="d-flex gap-1">
+                                    <a href="#"
+                                        class="btn btn-primary btn-sm" wicket:id="botaoEditar"
+                                        title="Editar"> <i class="bi bi-pencil"></i>
+                                    </a> 
+                                    <a href="#" class="btn btn-danger btn-sm"
+                                        wicket:id="botaoExcluir" title="Excluir"> <i
+                                            class="bi bi-trash"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm"
+                                        wicket:id="botaoGestao" title="Gestão do Jogo"> <i
+                                            class="bi bi-controller"></i>
+                                    </a>
                                 </td>
-                            </tr>
+							</tr>
                         </tbody>
                     </table>
                 </div>

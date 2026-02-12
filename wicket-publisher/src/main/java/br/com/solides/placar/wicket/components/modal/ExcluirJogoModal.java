@@ -1,8 +1,7 @@
 package br.com.solides.placar.wicket.components.modal;
 
-import br.com.solides.placar.service.JogoService;
-import br.com.solides.placar.shared.dto.JogoDTO;
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -10,12 +9,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
+import br.com.solides.placar.service.JogoService;
+import br.com.solides.placar.shared.dto.JogoDTO;
+import br.com.solides.placar.util.DateTimeConstants;
 import jakarta.inject.Inject;
-import jakarta.enterprise.inject.spi.CDI;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.io.Serializable;
-import java.time.format.DateTimeFormatter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Modal para confirmar exclusão de jogo.
@@ -28,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 public class ExcluirJogoModal extends Panel {
 
     private static final long serialVersionUID = 1L;
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Inject
     private JogoService jogoService;
@@ -53,41 +50,11 @@ public class ExcluirJogoModal extends Panel {
         
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
-        
-        // Garantir que o serviço esteja injetado
-        initializeService();
-        
+               
         initializeComponents();
     }
 
-    /**
-     * Inicializa o serviço, utilizando CDI ou fallback para JNDI
-     */
-    private void initializeService() {
-        if (jogoService == null) {
-            log.warn("JogoService não foi injetado via CDI em ExcluirJogoModal, tentando recuperar via CDI programático");
-            
-            try {
-                // Tentar via CDI programático
-                jogoService = CDI.current().select(JogoService.class).get();
-                log.info("JogoService recuperado via CDI programático em ExcluirJogoModal");
-            } catch (Exception e) {
-                log.warn("Falha ao recuperar JogoService via CDI programático em ExcluirJogoModal: {}", e.getMessage());
-                
-                try {
-                    // Fallback para JNDI lookup
-                    InitialContext ctx = new InitialContext();
-                    jogoService = (JogoService) ctx.lookup("java:app/JogoService");
-                    log.info("JogoService recuperado via JNDI lookup em ExcluirJogoModal");
-                } catch (NamingException ne) {
-                    log.error("Falha ao recuperar JogoService via JNDI em ExcluirJogoModal: {}", ne.getMessage());
-                    throw new RuntimeException("Não foi possível injetar JogoService em ExcluirJogoModal", ne);
-                }
-            }
-        } else {
-            log.debug("JogoService injetado corretamente via CDI em ExcluirJogoModal");
-        }
-    }
+  
 
     private void initializeComponents() {
         // Form principal
@@ -127,8 +94,8 @@ public class ExcluirJogoModal extends Panel {
         form.add(new Label("jogoDataHora", new Model<String>() {
             @Override
             public String getObject() {
-                return jogoParaExcluir != null ? 
-                    jogoParaExcluir.getDataHoraPartida().format(DATE_FORMATTER) : "-";
+                return (jogoParaExcluir != null && jogoParaExcluir.getDataPartida() != null && jogoParaExcluir.getHoraPartida() != null) ? 
+                    java.time.LocalDateTime.of(jogoParaExcluir.getDataPartida(), java.time.LocalTime.parse(jogoParaExcluir.getHoraPartida(), DateTimeConstants.TIME_FORMAT)).format(DateTimeConstants.DATETIME_BR_FORMAT) : "-";
             }
         }));
         

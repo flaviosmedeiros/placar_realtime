@@ -141,7 +141,7 @@ public class JogoRepository {
         }
         
         // Ordenação padrão
-        cq.orderBy(cb.desc(root.get("dataHoraPartida")), cb.desc(root.get("id")));
+        cq.orderBy(cb.desc(root.get("dataHoraPartida")));
         
         TypedQuery<Jogo> query = entityManager.createQuery(cq);
         List<Jogo> result = query.getResultList();

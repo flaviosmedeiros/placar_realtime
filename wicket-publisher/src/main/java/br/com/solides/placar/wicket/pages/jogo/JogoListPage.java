@@ -1,11 +1,10 @@
 package br.com.solides.placar.wicket.pages.jogo;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -33,6 +32,7 @@ import br.com.solides.placar.service.JogoService;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.dto.JogoFilterDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
+import br.com.solides.placar.util.DateTimeConstants;
 import br.com.solides.placar.wicket.components.modal.CriarJogoModal;
 import br.com.solides.placar.wicket.components.modal.EditarJogoModal;
 import br.com.solides.placar.wicket.components.modal.ExcluirJogoModal;
@@ -50,7 +50,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JogoListPage extends WebPage {
 
     private static final long serialVersionUID = 1L;
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Inject
     private JogoService jogoService;
@@ -230,10 +229,11 @@ public class JogoListPage extends WebPage {
                 item.add(new Label("placarB", Model.of(jogo.getPlacarB())));
                 item.add(new Label("status", Model.of(getStatusLabel(jogo.getStatus()))));
                 
-                String dh = jogo.getDataHoraPartida() != null
-                        ? jogo.getDataHoraPartida().format(DATE_FORMATTER)
+                String dataHoraStr = (jogo.getDataPartida() != null && jogo.getHoraPartida() != null) 
+                        ? LocalDateTime.of(jogo.getDataPartida(), LocalTime.parse(jogo.getHoraPartida(), DateTimeConstants.TIME_FORMAT)).format(DateTimeConstants.DATETIME_BR_FORMAT)
                         : "-";
-                item.add(new Label("dataHoraPartida", Model.of(dh)));            
+                
+                item.add(new Label("dataHoraPartida", Model.of(dataHoraStr)));            
                 
                 // Botões de ação
                 criarBotoesAcao(item, jogo);
@@ -291,6 +291,21 @@ public class JogoListPage extends WebPage {
             }
         };
         item.add(botaoExcluir);
+        
+        // Botão Gestão
+        AjaxLink<Void> botaoGestao = new AjaxLink<Void>("botaoGestao") {
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                log.info("Abrindo gestão do jogo ID: {}", jogo.getId());
+                
+                // Redirecionar para página de gestão
+                PageParameters params = new PageParameters();
+                params.add("jogoId", jogo.getId());
+                setResponsePage(GestaoJogoPage.class, params);
+            }
+        };
+        item.add(botaoGestao);
+        
     }
 
     private void criarBotaoAdicionar() {
@@ -405,93 +420,6 @@ public class JogoListPage extends WebPage {
         }
     }
 
-    /**
-     * Gera uma lista com 1 JogoDTO com valores aleatórios para testes
-     * @return Lista contendo um JogoDTO com dados aleatórios
-     */
-    private List<JogoDTO> gerarJogoAleatorio() {
-        Random random = new Random();
-        
-        // Lista de times para selecionar aleatoriamente
-        List<String> times = Arrays.asList(
-            "São Paulo", "Flamengo", "Palmeiras", "Corinthians", "Santos", 
-            "Vasco", "Grêmio", "Internacional", "Atlético-MG", "Cruzeiro",
-            "Fluminense", "Botafogo", "Atlético-PR", "Bahia", "Fortaleza"
-        );
-        
-        // Seleciona dois times diferentes aleatoriamente
-        String timeA = times.get(random.nextInt(times.size()));
-        String timeB;
-        do {
-            timeB = times.get(random.nextInt(times.size()));
-        } while (timeA.equals(timeB));
-        
-        // Gera placares aleatórios (0 a 5)
-        Integer placarA = random.nextInt(6);
-        Integer placarB = random.nextInt(6);
-        
-        // Seleciona status aleatório
-        StatusJogo[] statusOptions = StatusJogo.values();
-        StatusJogo status = statusOptions[random.nextInt(statusOptions.length)];
-        
-        // Gera data/hora da partida (últimos 30 dias ou próximos 7 dias)
-        LocalDateTime agora = LocalDateTime.now();
-        LocalDateTime dataHoraPartida = agora.minusDays(random.nextInt(30))
-                                             .plusHours(random.nextInt(24))
-                                             .withMinute(random.nextInt(60))
-                                             .withSecond(0)
-                                             .withNano(0);
-        
-        // Se for jogo futuro, coloca status como NAO_INICIADO e placar zerado
-        if (dataHoraPartida.isAfter(agora)) {
-            status = StatusJogo.NAO_INICIADO;
-            placarA = 0;
-            placarB = 0;
-        }
-        
-        // Tempo de jogo baseado no status
-        Integer tempoDeJogo = 0;
-        if (status == StatusJogo.EM_ANDAMENTO) {
-            tempoDeJogo = random.nextInt(90) + 1; // 1 a 90 minutos
-        } else if (status == StatusJogo.FINALIZADO) {
-            tempoDeJogo = 90 + random.nextInt(10); // 90 a 99 minutos
-        }
-        
-        // Data de encerramento (apenas se finalizado)
-        LocalDateTime dataHoraEncerramento = null;
-        if (status == StatusJogo.FINALIZADO) {
-            dataHoraEncerramento = dataHoraPartida.plusMinutes(tempoDeJogo);
-        }
-        
-        // Datas de criação e atualização
-        LocalDateTime dataCriacao = dataHoraPartida.minusDays(random.nextInt(7));
-        LocalDateTime dataAtualizacao = agora.minusMinutes(random.nextInt(60));
-        
-        // Cria o JogoDTO
-        JogoDTO jogo = JogoDTO.builder()
-                .id((long) (random.nextInt(1000) + 1))
-                .timeA(timeA)
-                .timeB(timeB)
-                .placarA(placarA)
-                .placarB(placarB)
-                .status(status)
-                .dataHoraPartida(dataHoraPartida)
-                .tempoDeJogo(tempoDeJogo)
-                .dataHoraEncerramento(dataHoraEncerramento)
-                .dataCriacao(dataCriacao)
-                .dataAtualizacao(dataAtualizacao)
-                .build();
-        
-        // Retorna lista com 1 jogo
-        List<JogoDTO> jogos = new ArrayList<>();
-        jogos.add(jogo);
-        
-        log.info("Jogo aleatório gerado: {} vs {} ({}-{}) - Status: {}", 
-                 timeA, timeB, placarA, placarB, status);
-        
-        return jogos;
-    }
-    
     
 
     public ListView<JogoDTO> getJogosListView() {

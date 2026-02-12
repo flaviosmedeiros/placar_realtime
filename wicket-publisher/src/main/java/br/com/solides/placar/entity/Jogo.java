@@ -1,17 +1,24 @@
 package br.com.solides.placar.entity;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import br.com.solides.placar.shared.enums.StatusJogo;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * Entidade JPA representando um Jogo de futebol.
@@ -21,14 +28,7 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Entity(name = "Jogo")
-@Table(name = "jogo", schema = "placar",
-    indexes = {
-        @Index(name = "idx_jogo_status", columnList = "status"),
-        @Index(name = "idx_jogo_data_partida", columnList = "data_hora_partida"),
-        @Index(name = "idx_jogo_times", columnList = "time_a, time_b"),
-        @Index(name = "idx_jogo_data_criacao", columnList = "data_criacao")
-    }
-)
+@Table(name = "jogo", schema = "placar")
 @Data
 @Builder
 @NoArgsConstructor
@@ -93,56 +93,22 @@ public class Jogo implements Serializable {
     @Column(name = "data_hora_partida", nullable = false)
     private LocalDateTime dataHoraPartida;
 
-    /**
-     * Tempo de jogo em minutos
-     */
-    @Min(value = 0, message = "Tempo de jogo não pode ser negativo")
-    @Column(name = "tempo_de_jogo")
-    @Builder.Default
-    private Integer tempoDeJogo = 0;
-
+   
     /**
      * Data e hora de encerramento do jogo
      */
     @Column(name = "data_hora_encerramento")
     private LocalDateTime dataHoraEncerramento;
-
-    /**
-     * Data de criação do registro
-     */
+    
+   
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
-    /**
-     * Data da última atualização
-     */
+   
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    /**
-     * Callback executado antes da persistência inicial
-     */
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        dataCriacao = now;
-        dataAtualizacao = now;
-        
-        // Garantir valores padrão
-        if (placarA == null) placarA = 0;
-        if (placarB == null) placarB = 0;
-        if (status == null) status = StatusJogo.NAO_INICIADO;
-        if (tempoDeJogo == null) tempoDeJogo = 0;
-    }
-
-    /**
-     * Callback executado antes de cada atualização
-     */
-    @PreUpdate  
-    protected void onUpdate() {
-        dataAtualizacao = LocalDateTime.now();
-    }
-
+    
     /**
      * Verifica se o jogo pode ter o placar alterado
      */

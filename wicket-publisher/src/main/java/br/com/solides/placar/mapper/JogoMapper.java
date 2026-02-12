@@ -1,18 +1,16 @@
 package br.com.solides.placar.mapper;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import br.com.solides.placar.entity.Jogo;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
+import br.com.solides.placar.util.DateTimeConstants;
+import br.com.solides.placar.util.PublisherUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
@@ -40,28 +38,34 @@ public class JogoMapper {
                 .placarA(entity.getPlacarA())
                 .placarB(entity.getPlacarB())
                 .status(entity.getStatus())
-                .dataHoraPartida(entity.getDataHoraPartida())
-                .tempoDeJogo(entity.getTempoDeJogo())
+                .tempoDeJogo(gerarTempoDejogo(entity))
                 .dataHoraEncerramento(entity.getDataHoraEncerramento())
                 .dataCriacao(entity.getDataCriacao())
                 .dataAtualizacao(entity.getDataAtualizacao())
                 .build();
-
-        // Converter dataHoraPartida para dataPartida e horaPartida
-        if (entity.getDataHoraPartida() != null) {
-            LocalDateTime dataHora = entity.getDataHoraPartida();
-            
-            // Converter para Date
-            dto.setDataPartida(Date.from(dataHora.atZone(ZoneId.systemDefault()).toInstant()));
-            
-            // Formatar hora como string HH:mm
-            dto.setHoraPartida(dataHora.format(DateTimeFormatter.ofPattern("HH:mm")));
+       
+        if (!PublisherUtils.nuloOuVazio(entity.getDataHoraPartida())) {
+            LocalDateTime dataHora = entity.getDataHoraPartida();           
+            dto.setDataPartida(entity.getDataHoraPartida().toLocalDate());          
+            dto.setHoraPartida(dataHora.format(DateTimeConstants.TIME_FORMAT));
         }
 
         return dto;
     }
 
-    /**
+    
+    private Integer gerarTempoDejogo(Jogo entity) {
+		Integer tempoDeJogo = 0;
+		if (entity.getStatus() == StatusJogo.EM_ANDAMENTO && !PublisherUtils.nuloOuVazio(entity.getDataHoraPartida())) {
+			LocalDateTime agora = LocalDateTime.now();
+			tempoDeJogo = (int) java.time.Duration.between(entity.getDataHoraPartida(), agora).toMinutes();
+		} else if (entity.getStatus() == StatusJogo.FINALIZADO && !PublisherUtils.nuloOuVazio(entity.getDataHoraPartida()) && !PublisherUtils.nuloOuVazio(entity.getDataHoraEncerramento())) {
+			tempoDeJogo = (int) java.time.Duration.between(entity.getDataHoraPartida(), entity.getDataHoraEncerramento()).toMinutes();
+		}
+		return tempoDeJogo;
+	}
+
+	/**
      * Converte DTO para Entity
      */
     public Jogo toEntity(JogoDTO dto) {
@@ -69,18 +73,7 @@ public class JogoMapper {
             return null;
         }
 
-        LocalDateTime dataHoraPartida = dto.getDataHoraPartida();
-        
-        // Se dataHoraPartida for null, tentar construir a partir de dataPartida e horaPartida
-        if (dataHoraPartida == null && dto.getDataPartida() != null && dto.getHoraPartida() != null) {
-            try {
-                LocalDate data = dto.getDataPartida().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalTime hora = LocalTime.parse(dto.getHoraPartida(), DateTimeFormatter.ofPattern("HH:mm"));
-                dataHoraPartida = LocalDateTime.of(data, hora);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Erro ao converter data e hora da partida", e);
-            }
-        }
+        LocalDateTime dataHoraPartida = construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
 
         return Jogo.builder()
                 .id(dto.getId())
@@ -90,7 +83,6 @@ public class JogoMapper {
                 .placarB(dto.getPlacarB())
                 .status(dto.getStatus())
                 .dataHoraPartida(dataHoraPartida)
-                .tempoDeJogo(dto.getTempoDeJogo())
                 .dataHoraEncerramento(dto.getDataHoraEncerramento())
                 .dataCriacao(dto.getDataCriacao())
                 .dataAtualizacao(dto.getDataAtualizacao())
@@ -105,18 +97,7 @@ public class JogoMapper {
             return null;
         }
 
-        LocalDateTime dataHoraPartida = criarDTO.getDataHoraPartida();
-        
-        // Se dataHoraPartida for null, tentar construir a partir de dataPartida e horaPartida
-        if (dataHoraPartida == null && criarDTO.getDataPartida() != null && criarDTO.getHoraPartida() != null) {
-            try {
-                LocalDate data = criarDTO.getDataPartida().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalTime hora = LocalTime.parse(criarDTO.getHoraPartida(), DateTimeFormatter.ofPattern("HH:mm"));
-                dataHoraPartida = LocalDateTime.of(data, hora);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Erro ao converter data e hora da partida no CriarJogoDTO", e);
-            }
-        }
+        LocalDateTime dataHoraPartida = construirDataHoraPartida(criarDTO.getDataPartida(), criarDTO.getHoraPartida());
 
         return Jogo.builder()
                 .timeA(criarDTO.getTimeA())
@@ -125,7 +106,8 @@ public class JogoMapper {
                 .placarA(0) // Sempre inicializa com 0
                 .placarB(0) // Sempre inicializa com 0
                 .status(StatusJogo.NAO_INICIADO) // Sempre inicializa como NAO_INICIADO
-                .tempoDeJogo(0)
+                .dataCriacao(LocalDateTime.now())
+                .dataAtualizacao(LocalDateTime.now())
                 .build();
     }
 
@@ -142,26 +124,15 @@ public class JogoMapper {
         entity.setPlacarA(dto.getPlacarA());
         entity.setPlacarB(dto.getPlacarB());
         entity.setStatus(dto.getStatus());
+        entity.setDataAtualizacao(LocalDateTime.now());
         
         // Atualizar dataHoraPartida
-        LocalDateTime dataHoraPartida = dto.getDataHoraPartida();
-        
-        // Se dataHoraPartida for null, tentar construir a partir de dataPartida e horaPartida
-        if (dataHoraPartida == null && dto.getDataPartida() != null && dto.getHoraPartida() != null) {
-            try {
-                LocalDate data = dto.getDataPartida().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalTime hora = LocalTime.parse(dto.getHoraPartida(), DateTimeFormatter.ofPattern("HH:mm"));
-                dataHoraPartida = LocalDateTime.of(data, hora);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Erro ao converter data e hora da partida", e);
-            }
-        }
+        LocalDateTime dataHoraPartida = construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
         
         entity.setDataHoraPartida(dataHoraPartida);
-        entity.setTempoDeJogo(dto.getTempoDeJogo());
         
         // dataHoraEncerramento só é atualizado quando o jogo é finalizado
-        if (dto.getStatus() == StatusJogo.FINALIZADO && entity.getDataHoraEncerramento() == null) {
+        if (dto.getStatus() == StatusJogo.FINALIZADO && PublisherUtils.nuloOuVazio(entity.getDataHoraEncerramento())) {
             entity.setDataHoraEncerramento(LocalDateTime.now());
         }
     }
@@ -175,8 +146,7 @@ public class JogoMapper {
         }
 
         return entities.stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(this::toDTO).toList();
     }
 
     /**
@@ -188,7 +158,22 @@ public class JogoMapper {
         }
 
         return dtos.stream()
-                .map(this::toEntity)
-                .collect(Collectors.toList());
+                .map(this::toEntity).toList();
+    }
+
+    /**
+     * Utilitário para construir LocalDateTime a partir de LocalDate e String de hora
+     */
+    private LocalDateTime construirDataHoraPartida(LocalDate dataPartida, String horaPartida) {
+        if (PublisherUtils.nuloOuVazio(dataPartida) || PublisherUtils.nuloOuVazio(horaPartida)) {
+            return null;
+        }
+        
+        try {
+            LocalTime hora = LocalTime.parse(horaPartida, DateTimeConstants.TIME_FORMAT);
+            return LocalDateTime.of(dataPartida, hora);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Erro ao converter data e hora da partida", e);
+        }
     }
 }

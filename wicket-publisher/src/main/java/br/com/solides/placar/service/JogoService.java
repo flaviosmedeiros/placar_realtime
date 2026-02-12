@@ -1,21 +1,28 @@
 package br.com.solides.placar.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import br.com.solides.placar.entity.Jogo;
 import br.com.solides.placar.mapper.JogoMapper;
 import br.com.solides.placar.repository.JogoRepository;
-import br.com.solides.placar.shared.dto.*;
+import br.com.solides.placar.shared.dto.AtualizarPlacarDTO;
+import br.com.solides.placar.shared.dto.CriarJogoDTO;
+import br.com.solides.placar.shared.dto.FinalizaJogoDTO;
+import br.com.solides.placar.shared.dto.InicializaJogoDTO;
+import br.com.solides.placar.shared.dto.JogoDTO;
+import br.com.solides.placar.shared.dto.JogoFilterDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
 import br.com.solides.placar.shared.exception.BusinessException;
 import br.com.solides.placar.shared.exception.EntityNotFoundException;
-import lombok.extern.slf4j.Slf4j;
-
+import br.com.solides.placar.util.DateTimeConstants;
+import br.com.solides.placar.util.PublisherUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Serviço de domínio para operações com Jogos.
@@ -139,88 +146,88 @@ public class JogoService {
     }
 
     /**
-     * Inicializa jogo (NAO_INICIADO -> EM_ANDAMENTO)
-     */
-    @Transactional
-    public JogoDTO inicializarJogo(@Valid @NotNull InicializaJogoDTO inicializaDTO) {
-        log.info("Inicializando jogo ID: {}", inicializaDTO.getJogoId());
-        
-        Jogo jogo = jogoRepository.findById(inicializaDTO.getJogoId())
-            .orElseThrow(() -> EntityNotFoundException.jogoNaoEncontrado(inicializaDTO.getJogoId()));
-        
-        // Validar se pode ser inicializado
-        if (!jogo.podeInicializar()) {
-            throw BusinessException.jogoJaInicializado(jogo.getId());
-        }
-        
-        // Inicializar
-        jogo.inicializar();
-        
-        // Salvar
-        Jogo jogoAtualizado = jogoRepository.save(jogo);
-        
-        log.info("Jogo inicializado com sucesso, ID: {}", jogoAtualizado.getId());
-        return jogoMapper.toDTO(jogoAtualizado);
-    }
-
-    /**
      * Finaliza jogo (EM_ANDAMENTO -> FINALIZADO)
      */
     @Transactional
-    public JogoDTO finalizarJogo(@Valid @NotNull FinalizaJogoDTO finalizaDTO) {
-        log.info("Finalizando jogo ID: {}", finalizaDTO.getJogoId());
+    public JogoDTO finalizarJogo(@NotNull Long jogoId) {
+        log.info("Finalizando jogo ID: {}", jogoId);
         
-        Jogo jogo = jogoRepository.findById(finalizaDTO.getJogoId())
-            .orElseThrow(() -> EntityNotFoundException.jogoNaoEncontrado(finalizaDTO.getJogoId()));
+        Jogo jogo = jogoRepository.findById(jogoId)
+            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
         
-        // Validar se pode ser finalizado
-        if (!jogo.podeFinalizar()) {
-            throw BusinessException.jogoJaFinalizado(jogo.getId());
+        // Validar se o jogo pode ser finalizado
+        if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
+            throw new BusinessException("Apenas jogos com status 'Em Andamento' podem ser finalizados. Status atual: " + jogo.getStatus());
         }
         
-        // Finalizar
-        jogo.finalizar();
+        // Atualizar jogo
+        jogo.setStatus(StatusJogo.FINALIZADO);
+        jogo.setDataHoraEncerramento(LocalDateTime.now());
         
-        // Salvar
-        Jogo jogoAtualizado = jogoRepository.save(jogo);
+        Jogo jogoSalvo = jogoRepository.save(jogo);
         
-        log.info("Jogo finalizado com sucesso, ID: {}", jogoAtualizado.getId());
-        return jogoMapper.toDTO(jogoAtualizado);
+        log.info("Jogo ID: {} finalizado com sucesso", jogoId);
+        return jogoMapper.toDTO(jogoSalvo);
     }
 
     /**
-     * Atualiza placar do jogo
+     * Inicia um jogo - altera status para EM_ANDAMENTO e zera placar
      */
     @Transactional
-    public JogoDTO atualizarPlacar(@Valid @NotNull AtualizarPlacarDTO atualizarDTO) {
-        log.info("Atualizando placar do jogo ID: {}", atualizarDTO.getJogoId());
+    public JogoDTO iniciarJogo(@NotNull Long jogoId) {
+        log.info("Iniciando jogo ID: {}", jogoId);
         
-        Jogo jogo = jogoRepository.findById(atualizarDTO.getJogoId())
-            .orElseThrow(() -> EntityNotFoundException.jogoNaoEncontrado(atualizarDTO.getJogoId()));
+        Jogo jogo = jogoRepository.findById(jogoId)
+            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
         
-        // Validar se placar pode ser alterado
-        if (!jogo.podeAlterarPlacar()) {
-            throw BusinessException.jogoNaoInicializado(jogo.getId());
+        // Validar se o jogo pode ser iniciado
+        if (jogo.getStatus() != StatusJogo.NAO_INICIADO) {
+            throw new BusinessException("Apenas jogos com status 'Não Iniciado' podem ser iniciados. Status atual: " + jogo.getStatus());
+        }
+        
+        // Atualizar jogo
+        jogo.setStatus(StatusJogo.EM_ANDAMENTO);
+        jogo.setPlacarA(0);
+        jogo.setPlacarB(0);
+        // dataHoraPartida já deveria estar definida, mas garantir que está no momento atual se não estiver
+        if (jogo.getDataHoraPartida() == null || jogo.getDataHoraPartida().isAfter(LocalDateTime.now())) {
+            jogo.setDataHoraPartida(LocalDateTime.now());
+        }
+        
+        Jogo jogoSalvo = jogoRepository.save(jogo);
+        
+        log.info("Jogo ID: {} iniciado com sucesso", jogoId);
+        return jogoMapper.toDTO(jogoSalvo);
+    }
+    
+    /**
+     * Atualiza apenas o placar do jogo
+     */
+    @Transactional  
+    public JogoDTO atualizarPlacar(@NotNull Long jogoId, @NotNull Integer placarA, @NotNull Integer placarB) {
+        log.info("Atualizando placar do jogo ID: {} - {} x {}", jogoId, placarA, placarB);
+        
+        Jogo jogo = jogoRepository.findById(jogoId)
+            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
+        
+        // Validar se o jogo pode ter placar atualizado
+        if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
+            throw new BusinessException("Apenas jogos em andamento podem ter placar atualizado. Status atual: " + jogo.getStatus());
         }
         
         // Validar placares
-        if (atualizarDTO.getPlacarA() < 0) {
-            throw BusinessException.placarInvalido(atualizarDTO.getPlacarA(), "Time A");
-        }
-        if (atualizarDTO.getPlacarB() < 0) {
-            throw BusinessException.placarInvalido(atualizarDTO.getPlacarB(), "Time B");
+        if (placarA < 0 || placarB < 0) {
+            throw new BusinessException("Placar não pode ser negativo");
         }
         
         // Atualizar placar
-        jogo.atualizarPlacar(atualizarDTO.getPlacarA(), atualizarDTO.getPlacarB());
+        jogo.setPlacarA(placarA);
+        jogo.setPlacarB(placarB);
         
-        // Salvar
-        Jogo jogoAtualizado = jogoRepository.save(jogo);
+        Jogo jogoSalvo = jogoRepository.save(jogo);
         
-        log.info("Placar atualizado com sucesso, ID: {} - {}x{}", 
-            jogoAtualizado.getId(), jogoAtualizado.getPlacarA(), jogoAtualizado.getPlacarB());
-        
-        return jogoMapper.toDTO(jogoAtualizado);
+        log.info("Placar do jogo ID: {} atualizado com sucesso - {} x {}", jogoId, placarA, placarB);
+        return jogoMapper.toDTO(jogoSalvo);
     }
 
     // --- Métodos privados de validação ---
@@ -232,8 +239,20 @@ public class JogoService {
         }
         
         // Validar data/hora da partida
-        if (criarDTO.getDataHoraPartida().isBefore(LocalDateTime.now().minusHours(1))) {
-            throw new BusinessException("Data/hora da partida não pode ser no passado");
+        if (!PublisherUtils.nuloOuVazio(criarDTO.getDataPartida()) && !PublisherUtils.nuloOuVazio(criarDTO.getHoraPartida())) {
+            try {
+                LocalDateTime dataHoraPartida = LocalDateTime.of(
+                    criarDTO.getDataPartida(), 
+                    java.time.LocalTime.parse(criarDTO.getHoraPartida(), DateTimeConstants.TIME_FORMAT)
+                );
+                if (dataHoraPartida.isBefore(LocalDateTime.now().minusHours(1))) {
+                    throw new BusinessException("Data/hora da partida não pode ser no passado");
+                }
+            } catch (java.time.format.DateTimeParseException e) {
+                throw new BusinessException("Formato de hora inválido. Use o formato HH:mm");
+            }
+        } else {
+            throw new BusinessException("Data e hora da partida são obrigatórias");
         }
     }
 
@@ -257,9 +276,7 @@ public class JogoService {
         validarTransicaoStatus(jogoExistente.getStatus(), jogoDTO.getStatus(), jogoDTO.getId());
     }
 
-    private void validarRemocaoJogo(Jogo jogo) {
-        // Pode remover jogos em qualquer status por enquanto
-        // Futuramente pode adicionar regras específicas
+    private void validarRemocaoJogo(Jogo jogo) {       
         log.debug("Validação de remoção passou para jogo ID: {}", jogo.getId());
     }
 
