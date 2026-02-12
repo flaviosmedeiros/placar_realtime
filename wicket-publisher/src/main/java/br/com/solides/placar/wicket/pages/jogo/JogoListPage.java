@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.NumberTextField;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -292,20 +293,20 @@ public class JogoListPage extends WebPage {
         };
         item.add(botaoExcluir);
         
-        // Botão Gestão
-        AjaxLink<Void> botaoGestao = new AjaxLink<Void>("botaoGestao") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                log.info("Abrindo gestão do jogo ID: {}", jogo.getId());
-                
-                // Redirecionar para página de gestão
-                PageParameters params = new PageParameters();
-                params.add("jogoId", jogo.getId());
-                setResponsePage(GestaoJogoPage.class, params);
-            }
-        };
-        item.add(botaoGestao);
+         
         
+		item.add(new Link<Void>("botaoGestao") {
+			@Override
+			public void onClick() {
+				Long jogoId = item.getModelObject().getId();
+
+				PageParameters params = new PageParameters()
+						.add("jogoId", jogoId);
+
+				setResponsePage(GestaoJogoPage.class, params);
+			}
+		});
+
     }
 
     private void criarBotaoAdicionar() {

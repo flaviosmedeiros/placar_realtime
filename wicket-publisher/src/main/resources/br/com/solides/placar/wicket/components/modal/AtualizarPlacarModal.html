@@ -1,0 +1,81 @@
+<wicket:panel>
+    <!-- Modal -->
+    <div class="modal fade" id="modalAtualizarPlacar" tabindex="-1" aria-labelledby="modalAtualizarPlacarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalAtualizarPlacarLabel">
+                        <i class="bi bi-trophy"></i>
+                        Atualizar Placar
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form wicket:id="formAtualizarPlacar">
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <h6 class="text-muted">Atualize o placar do jogo</h6>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <!-- Placar Time A -->
+                            <div class="col-md-5">
+                                <label for="placarA" class="form-label">
+                                    <i class="bi bi-shield-fill text-primary"></i>
+                                    <span wicket:id="timeA">Time A</span>
+                                </label>
+                                <input type="number" 
+                                       class="form-control form-control-lg text-center fw-bold" 
+                                       wicket:id="placarA" 
+                                       min="0"
+                                       required>
+                                <div class="form-text">Gols do Time A</div>
+                            </div>
+                            
+                            <!-- Separador -->
+                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                <span class="display-4 fw-bold text-muted">x</span>
+                            </div>
+                            
+                            <!-- Placar Time B -->
+                            <div class="col-md-5">
+                                <label for="placarB" class="form-label">
+                                    <i class="bi bi-shield-fill text-danger"></i>
+                                    <span wicket:id="timeB">Time B</span>
+                                </label>
+                                <input type="number" 
+                                       class="form-control form-control-lg text-center fw-bold" 
+                                       wicket:id="placarB" 
+                                       min="0"
+                                       required>
+                                <div class="form-text">Gols do Time B</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informação adicional -->
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Atenção:</strong> O placar só pode ser atualizado durante jogos em andamento.
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                wicket:id="botaoCancelar"
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-primary" 
+                                wicket:id="botaoSalvar">
+                            <i class="bi bi-check-circle"></i>
+                            Salvar Placar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</wicket:panel>

@@ -7,6 +7,8 @@ import org.apache.wicket.csp.CSPHeaderConfiguration;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import br.com.solides.placar.wicket.pages.HomePage;
+import br.com.solides.placar.wicket.pages.jogo.GestaoJogoPage;
+import br.com.solides.placar.wicket.pages.jogo.JogoListPage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -71,8 +73,9 @@ public class WicketPublisherApplication extends WebApplication {
         cfg.add(CSPDirective.FONT_SRC, "https://cdn.jsdelivr.net");
         cfg.add(CSPDirective.IMG_SRC, "data:");
         cfg.add(CSPDirective.IMG_SRC, "https://cdn.jsdelivr.net");
-        cfg.add(CSPDirective.CONNECT_SRC, "https://cdn.jsdelivr.net");
-
+        
+        mountPage("/jogos/lista", JogoListPage.class);
+        mountPage("/jogos/gerenciar", GestaoJogoPage.class);
         
         log.info("Aplicação configurada para modo DESENVOLVIMENTO");
     }

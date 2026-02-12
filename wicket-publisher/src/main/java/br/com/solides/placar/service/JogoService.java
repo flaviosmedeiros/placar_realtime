@@ -6,10 +6,7 @@ import java.util.List;
 import br.com.solides.placar.entity.Jogo;
 import br.com.solides.placar.mapper.JogoMapper;
 import br.com.solides.placar.repository.JogoRepository;
-import br.com.solides.placar.shared.dto.AtualizarPlacarDTO;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
-import br.com.solides.placar.shared.dto.FinalizaJogoDTO;
-import br.com.solides.placar.shared.dto.InicializaJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.dto.JogoFilterDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
@@ -189,11 +186,8 @@ public class JogoService {
         jogo.setStatus(StatusJogo.EM_ANDAMENTO);
         jogo.setPlacarA(0);
         jogo.setPlacarB(0);
-        // dataHoraPartida já deveria estar definida, mas garantir que está no momento atual se não estiver
-        if (jogo.getDataHoraPartida() == null || jogo.getDataHoraPartida().isAfter(LocalDateTime.now())) {
-            jogo.setDataHoraPartida(LocalDateTime.now());
-        }
-        
+       
+        jogo.setDataHoraPartida(LocalDateTime.now());
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Jogo ID: {} iniciado com sucesso", jogoId);
@@ -227,6 +221,7 @@ public class JogoService {
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Placar do jogo ID: {} atualizado com sucesso - {} x {}", jogoId, placarA, placarB);
+       
         return jogoMapper.toDTO(jogoSalvo);
     }
 

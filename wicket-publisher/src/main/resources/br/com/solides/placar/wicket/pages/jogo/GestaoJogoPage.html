@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title wicket:id="pageTitle">Gestão do Jogo</title>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0" wicket:id="headerTitle">
+                            <i class="bi bi-trophy-fill text-primary me-2"></i>
+                            Gestão do Jogo
+                        </h1>
+                    </div>
+                    <div>
+                        <a href="#" class="btn btn-secondary" wicket:id="botaoVoltar">
+                            <i class="bi bi-arrow-left"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div wicket:id="feedback"></div>
+
+        <!-- Formulário de Visualização do Jogo -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Informações do Jogo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form wicket:id="formVisualizacao">
+                            <div class="row g-3">
+                                <!-- ID do Jogo -->
+                                <div class="col-md-2">
+                                    <label class="form-label">
+                                        <i class="bi bi-hash text-muted"></i>
+                                        ID
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="id" readonly>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="col-md-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-flag text-info"></i>
+                                        Status
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="statusLabel" readonly>
+                                </div>
+                                
+                                <!-- Data da Partida -->
+                                <div class="col-md-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar3 text-success"></i>
+                                        Data da Partida
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="dataPartidaStr" readonly>
+                                </div>
+                                
+                                <!-- Hora da Partida -->
+                                <div class="col-md-2">
+                                    <label class="form-label">
+                                        <i class="bi bi-clock text-success"></i>
+                                        Hora
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="horaPartida" readonly>
+                                </div>
+                                
+                                <!-- Tempo de Jogo -->
+                                <div class="col-md-2">
+                                    <label class="form-label">
+                                        <i class="bi bi-stopwatch text-warning"></i>
+                                        Tempo (min)
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="tempoDeJogo" readonly>
+                                </div>
+                                
+                                <!-- Time A -->
+                                <div class="col-md-5">
+                                    <label class="form-label">
+                                        <i class="bi bi-shield-fill text-primary"></i>
+                                        Time A
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="timeA" readonly>
+                                </div>
+                                
+                                <!-- Time B -->
+                                <div class="col-md-5">
+                                    <label class="form-label">
+                                        <i class="bi bi-shield-fill text-danger"></i>
+                                        Time B
+                                    </label>
+                                    <input type="text" class="form-control" wicket:id="timeB" readonly>
+                                </div>
+                                
+                                <!-- Placar -->
+                                <div class="col-md-2">
+                                    <label class="form-label text-center d-block">
+                                        <i class="bi bi-trophy text-warning"></i>
+                                        Placar
+                                    </label>
+                                    <div class="row g-1">
+                                        <div class="col-5">
+                                            <input type="number" class="form-control text-center fw-bold" 
+                                                   wicket:id="placarA" readonly>
+                                        </div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">
+                                            <span class="fw-bold fs-4">x</span>
+                                        </div>
+                                        <div class="col-5">
+                                            <input type="number" class="form-control text-center fw-bold" 
+                                                   wicket:id="placarB" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar de Ações -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-gear-fill me-2"></i>
+                            Ações de Controle
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-3 justify-content-center">
+                            <!-- Botão Iniciar Jogo -->
+                            <a href="#" 
+                               class="btn btn-success btn-lg" 
+                               wicket:id="botaoIniciar">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Iniciar Jogo
+                            </a>
+                            
+                            <!-- Botão Finalizar Jogo -->
+                            <a href="#" 
+                               class="btn btn-danger btn-lg" 
+                               wicket:id="botaoFinalizar">
+                                <i class="bi bi-stop-circle me-2"></i>
+                                Finalizar Jogo
+                            </a>
+                            
+                            <!-- Botão Atualizar Placar -->
+                            <a href="#" 
+                               class="btn btn-primary btn-lg" 
+                               wicket:id="botaoAtualizarPlacar">
+                                <i class="bi bi-plus-square me-2"></i>
+                                Atualizar Placar
+                            </a>
+                        </div>
+                        
+                        <!-- Informações sobre os botões -->
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Instruções:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Iniciar Jogo:</strong> Atualiza status para "Em Andamento" e zera placar</li>
+                                <li><strong>Finalizar Jogo:</strong> Atualiza status para "Finalizado" e registra data/hora de término</li>
+                                <li><strong>Atualizar Placar:</strong> Permite alterar placar dos times durante o jogo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para atualizar placar -->
+    <div wicket:id="atualizarPlacarModal"></div>
+</body>
+</html>
