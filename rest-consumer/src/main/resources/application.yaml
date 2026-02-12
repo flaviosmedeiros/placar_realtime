@@ -90,7 +90,19 @@ management:
       export:
         enabled: true
 
+springdoc:
+  api-docs:
+    enabled: ${app.docs.enabled:true}
+    path: /consumer/api-docs
+  swagger-ui:
+    enabled: ${app.docs.enabled:true}
+    path: /consumer/swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
 app:
+  docs:
+    enabled: true
   rabbit:
     exchange: games.topic
     queue: games.partidas
