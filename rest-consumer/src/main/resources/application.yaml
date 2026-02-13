@@ -11,6 +11,10 @@ spring:
       simple:
         acknowledge-mode: auto
         default-requeue-rejected: false
+        missing-queues-fatal: false
+        concurrency: 2
+        max-concurrency: 8
+        prefetch: 50
         retry:
           enabled: true
           initial-interval: 1000
@@ -66,7 +70,7 @@ resilience4j:
     instances:
       redis:
         # Número máximo de tentativas (incluindo a primeira)
-        maxAttempts: 3
+        maxAttempts: 1
         # Tempo de espera entre tentativas
         waitDuration: 500ms
         # Habilitar backoff exponencial

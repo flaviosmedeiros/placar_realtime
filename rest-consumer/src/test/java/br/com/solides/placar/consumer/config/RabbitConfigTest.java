@@ -13,10 +13,11 @@ import org.springframework.amqp.core.Binding.DestinationType;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 
@@ -112,15 +113,17 @@ class RabbitConfigTest {
 
     @Test
     void shouldConfigureListenerContainerFactory() {
+        SimpleRabbitListenerContainerFactoryConfigurer configurer = new SimpleRabbitListenerContainerFactoryConfigurer(
+                new RabbitProperties());
         ConnectionFactory connectionFactory = Mockito.mock(ConnectionFactory.class);
         MessageConverter converter = Mockito.mock(MessageConverter.class);
 
-        SimpleRabbitListenerContainerFactory factory = config.rabbitListenerContainerFactory(connectionFactory,
+        SimpleRabbitListenerContainerFactory factory = config.rabbitListenerContainerFactory(configurer, connectionFactory,
                 converter);
 
         assertSame(connectionFactory, getField(factory, "connectionFactory"));
         assertSame(converter, getField(factory, "messageConverter"));
-        assertInstanceOf(ConditionalRejectingErrorHandler.class, getField(factory, "errorHandler"));
+        assertEquals(Boolean.FALSE, getField(factory, "defaultRequeueRejected"));
     }
 
     private AppProperties appProperties() {

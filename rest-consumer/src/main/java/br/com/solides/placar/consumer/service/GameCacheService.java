@@ -76,10 +76,13 @@ public class GameCacheService {
             if (incomingEvent.getTempoDeJogo() >= cachedEvent.getTempoDeJogo()
             		&& !StatusJogo.FINALIZADO.equals(cachedEvent.getStatus())) {
                 log.info("Event {} found in cache. Merging updates.", incomingEvent.getId());
+                cachedEvent.setTimeA(incomingEvent.getTimeA());
+                cachedEvent.setTimeB(incomingEvent.getTimeB());
                 cachedEvent.setPlacarA(incomingEvent.getPlacarA());
                 cachedEvent.setPlacarB(incomingEvent.getPlacarB());
                 cachedEvent.setStatus(incomingEvent.getStatus());
                 cachedEvent.setTempoDeJogo(incomingEvent.getTempoDeJogo());
+                cachedEvent.setDataHoraInicioPartida(incomingEvent.getDataHoraInicioPartida());
                 cachedEvent.setDataHoraEncerramento(incomingEvent.getDataHoraEncerramento());
                 return cachedEvent;
             }

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class GameCacheRepository {
 
+    private static final String BACKEND_REDIS = "redis";
+
     private static final Logger logger = LoggerFactory.getLogger(GameCacheRepository.class);
 
     private final RedisTemplate<String, PlacarAtualizadoEvent> redisJsonTemplate;
@@ -21,8 +23,8 @@ public class GameCacheRepository {
         this.redisJsonTemplate = redisJsonTemplate;
     }
 
-    @CircuitBreaker(name = "redis", fallbackMethod = "saveFallback")
-    @Retry(name = "redis")
+    @CircuitBreaker(name = BACKEND_REDIS)
+    @Retry(name = BACKEND_REDIS)
     public void save(PlacarAtualizadoEvent event) {
         if (event == null || event.getId() == null) {
             logger.warn("Attempted to save null event or event with null ID");
@@ -41,8 +43,8 @@ public class GameCacheRepository {
         }
     }
 
-    @CircuitBreaker(name = "redis", fallbackMethod = "saveGameWithTtlFallback")
-    @Retry(name = "redis")
+    @CircuitBreaker(name = BACKEND_REDIS)
+    @Retry(name = BACKEND_REDIS)
     public void saveGameWithTtl(PlacarAtualizadoEvent event, Duration ttl) {
         if (event == null || event.getId() == null) {
             logger.warn("Attempted to save null event or event with null ID with TTL");
@@ -63,8 +65,8 @@ public class GameCacheRepository {
         }
     }
 
-    @CircuitBreaker(name = "redis", fallbackMethod = "findByIdFallback")
-    @Retry(name = "redis")
+    @CircuitBreaker(name = BACKEND_REDIS)
+    @Retry(name = BACKEND_REDIS)
     public PlacarAtualizadoEvent findById(Long id) {
         if (id == null) {
             logger.warn("Attempted to find game with null ID");
@@ -90,24 +92,5 @@ public class GameCacheRepository {
 
     private String buildKey(Long id) {
         return "game:" + id;
-    }
-
-    // Fallback methods for Circuit Breaker
-    protected void saveFallback(PlacarAtualizadoEvent event, Exception ex) {
-        logger.warn("Circuit Breaker OPEN or max retries exceeded for save operation. Game {} not saved to Redis: {}",
-                event != null ? event.getId() : "null", ex.getMessage());
-    }
-
-    protected void saveGameWithTtlFallback(PlacarAtualizadoEvent event, Duration ttl, Exception ex) {
-        logger.warn(
-                "Circuit Breaker OPEN or max retries exceeded for saveGameWithTtl operation. Game {} not saved to Redis: {}",
-                event != null ? event.getId() : "null", ex.getMessage());
-    }
-
-    protected PlacarAtualizadoEvent findByIdFallback(Long id, Exception ex) {
-        logger.warn(
-                "Circuit Breaker OPEN or max retries exceeded for findById operation. Game {} not retrieved from Redis: {}",
-                id, ex.getMessage());
-        return null;
     }
 }
