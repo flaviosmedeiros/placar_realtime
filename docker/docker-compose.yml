@@ -8,11 +8,13 @@ services:
       POSTGRES_USER: placar_user
       POSTGRES_PASSWORD: placar_pass
       PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: America/Sao_Paulo
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - placar-network
     healthcheck:
@@ -25,11 +27,14 @@ services:
   redis:
     image: redis:7-alpine
     container_name: placar-redis
+    environment:
+      TZ: America/Sao_Paulo
     command: redis-server --appendonly yes --requirepass redis_pass
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - placar-network
     healthcheck:
@@ -43,15 +48,17 @@ services:
     image: rabbitmq:3.12-management-alpine
     container_name: placar-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: rabbitmq_user
-      RABBITMQ_DEFAULT_PASS: rabbitmq_pass
-      RABBITMQ_DEFAULT_VHOST: placar_vhost
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+      RABBITMQ_DEFAULT_VHOST: my_vhost
+      TZ: America/Sao_Paulo
     ports:
       - "5672:5672"   # AMQP port
       - "15672:15672" # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - rabbitmq_log:/var/log/rabbitmq
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - placar-network
     healthcheck:
@@ -68,10 +75,12 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@placar.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      TZ: America/Sao_Paulo
     ports:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - placar-network
     depends_on:
@@ -83,8 +92,9 @@ services:
     container_name: placar-payara
     environment:
       PAYARA_ADMIN_USER: admin
-      PAYARA_ADMIN_PASSWORD: admin123
+      PAYARA_ADMIN_PASSWORD: root
       PAYARA_DOMAIN_NAME: domain1
+      TZ: America/Sao_Paulo
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,8 +108,48 @@ services:
     volumes:
       - payara_domain_data:/opt/payara/appserver/glassfish/domains
       - ./payara/deployments:/opt/payara/deployments
+      - ./payara/lib/postgresql-42.7.1.jar:/opt/payara/appserver/glassfish/lib/postgresql-42.7.1.jar:ro
+      - ./payara-init.sh:/docker-entrypoint.sh:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: ["/docker-entrypoint.sh"]
     networks:
       - placar-network
+
+  # REST Consumer - Aplicação Spring Boot
+  rest-consumer:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: placar-rest-consumer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Sobrescrever configurações do application.yaml para ambiente Docker
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: redis_pass
+      TZ: America/Sao_Paulo
+      # Java options para tunning de memória
+      JAVA_OPTS: "-Xms256m -Xmx512m -Duser.timezone=America/Sao_Paulo"
+    ports:
+      - "8585:8585"
+    volumes:
+      - ../rest-consumer/target/rest-consumer-1.0.0-SNAPSHOT.jar:/app/rest-consumer.jar:ro
+      - /etc/localtime:/etc/localtime:ro
+    working_dir: /app
+    command: sh -c "apk add --no-cache curl && java $$JAVA_OPTS -jar rest-consumer.jar"
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8585/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
 
 networks:
   placar-network:
