@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { GameStatus, game } from './models/game.model';
 import { GameSseService } from './services/game-sse.service';
 
-type GameUpdate = Partial<game> & { id: string };
 
 @Component({
   selector: 'app-root',
@@ -32,6 +31,7 @@ export class App implements OnInit, OnDestroy {
       onInicio: (update) => this.iniciarJogo(update),
       onPlacar: (update) => this.atualizarPlacar(update),
       onEncerrado: (update) => this.encerrarJogo(update),
+      onExcluido: (update) => this.excluirJogoNovo(update),
       onError: () => {
         console.error('Erro ao receber informações das partidas');
       }
@@ -59,45 +59,47 @@ export class App implements OnInit, OnDestroy {
     return `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
   }
 
+  protected formatarStatus(status?: string | null): string {
+    switch (status) {
+      case GameStatus.NAO_INICIADO:
+        return 'Não iniciado';
+      case GameStatus.EM_ANDAMENTO:
+        return 'Em andamento';
+      case GameStatus.FINALIZADO:
+        return 'Finalizado';
+      default:
+        return status ?? '-';
+    }
+  }
 
-  private receberNovoJogo(update: GameUpdate): void {
-    const base = this.buscarJogo(update.id);
-    const jogo = this.criarJogo(update, GameStatus.NAO_INICIADO, base);
+
+  private receberNovoJogo(update: game): void {
+    const jogo = this.criarJogo(update, GameStatus.NAO_INICIADO);
     this.atualizarReferenciaTempo(update, jogo, GameStatus.NAO_INICIADO);
     this.moverJogo(jogo, GameStatus.NAO_INICIADO);
   }
 
-  private iniciarJogo(update: GameUpdate): void {
-    const base = this.buscarJogo(update.id);
-    const jogo = this.criarJogo(update, GameStatus.EM_ANDAMENTO, base);
+  private iniciarJogo(update: game): void {
+    const jogo = this.criarJogo(update, GameStatus.EM_ANDAMENTO);
     this.atualizarReferenciaTempo(update, jogo, GameStatus.EM_ANDAMENTO);
     this.moverJogo(jogo, GameStatus.EM_ANDAMENTO);
   }
 
-  private atualizarPlacar(update: GameUpdate): void {
-    const lista = this.jogosEmAndamento();
-    const indice = lista.findIndex((item) => item.id === update.id);
-
-    if (indice >= 0) {
-      const atualizado = this.criarJogo(update, GameStatus.EM_ANDAMENTO, lista[indice]);
-      this.atualizarReferenciaTempo(update, atualizado, GameStatus.EM_ANDAMENTO);
-      const proxima = [...lista];
-      proxima[indice] = atualizado;
-      this.jogosEmAndamento.set(proxima);
-      return;
-    }
-
-    const base = this.buscarJogo(update.id);
-    const jogo = this.criarJogo(update, GameStatus.EM_ANDAMENTO, base);
+  private atualizarPlacar(update: game): void {
+    const jogo = this.criarJogo(update, GameStatus.EM_ANDAMENTO);
     this.atualizarReferenciaTempo(update, jogo, GameStatus.EM_ANDAMENTO);
     this.moverJogo(jogo, GameStatus.EM_ANDAMENTO);
   }
 
-  private encerrarJogo(update: GameUpdate): void {
-    const base = this.buscarJogo(update.id);
-    const jogo = this.criarJogo(update, GameStatus.FINALIZADO, base);
+  private encerrarJogo(update: game): void {
+    const jogo = this.criarJogo(update, GameStatus.FINALIZADO);
     this.atualizarReferenciaTempo(update, jogo, GameStatus.FINALIZADO);
     this.moverJogo(jogo, GameStatus.FINALIZADO);
+  }
+
+  private excluirJogoNovo(update: game): void {
+    this.jogosNovos.update((lista) => this.removerPorId(lista, update.id));
+    this.referenciasTempo.delete(this.normalizarId(update.id));
   }
 
   private iniciarRelogio(): void {
@@ -117,7 +119,7 @@ export class App implements OnInit, OnDestroy {
     this.relogioIntervalo = null;
   }
 
-  private atualizarReferenciaTempo(update: GameUpdate, jogo: game, status: GameStatus): void {
+  private atualizarReferenciaTempo(update: game, jogo: game, status: GameStatus): void {
     if (status !== GameStatus.EM_ANDAMENTO) {
       this.referenciasTempo.delete(jogo.id);
       return;
@@ -161,29 +163,14 @@ export class App implements OnInit, OnDestroy {
 
   private ehNumeroValido(valor: unknown): valor is number {
     return typeof valor === 'number' && Number.isFinite(valor);
-  }
+  }  
 
-  private buscarJogo(id: string): game | null {
-    return (
-      this.jogosNovos().find((item) => item.id === id) ??
-      this.jogosEmAndamento().find((item) => item.id === id) ??
-      this.jogosEncerrados().find((item) => item.id === id) ??
-      null
-    );
-  }
-
-  private criarJogo(update: GameUpdate, statusPadrao: GameStatus, base: game | null): game {
-    return {
-      id: update.id,
-      timeA: update.timeA ?? base?.timeA ?? 'Time A',
-      timeB: update.timeB ?? base?.timeB ?? 'Time B',
-      placarA: update.placarA ?? base?.placarA ?? 0,
-      placarB: update.placarB ?? base?.placarB ?? 0,
-      status: update.status ?? base?.status ?? statusPadrao,
-      tempoDeJogo: update.tempoDeJogo ?? base?.tempoDeJogo ?? 0,
-      dataHoraInicioPartida: this.criarData(update.dataHoraInicioPartida ?? base?.dataHoraInicioPartida),
-      dataHoraEncerramento: this.criarData(update.dataHoraEncerramento ?? base?.dataHoraEncerramento)
-    };
+  private criarJogo(update: game, statusPadrao: GameStatus): game {
+    update.status = statusPadrao;
+    update.dataHoraInicioPartida = this.criarData(update.dataHoraInicioPartida);
+    update.dataHoraEncerramento = this.criarData(update.dataHoraEncerramento);
+    update.dataHoraEncerramento = this.criarData(update.dataHoraEncerramento);
+    return update;
   }
 
   private criarData(valor: unknown): Date {
@@ -202,36 +189,38 @@ export class App implements OnInit, OnDestroy {
     this.jogosNovos.update((lista) => this.removerPorId(lista, jogo.id));
     this.jogosEmAndamento.update((lista) => this.removerPorId(lista, jogo.id));
     this.jogosEncerrados.update((lista) => this.removerPorId(lista, jogo.id));
-
-    const destinoComStatus = { ...jogo, status: destino };
-
+    
     switch (destino) {
       case GameStatus.NAO_INICIADO:
-        this.jogosNovos.update((lista) => this.adicionarOuAtualizar(lista, destinoComStatus));
+        this.jogosNovos.update((lista) => this.adicionarOuAtualizar(lista, jogo));
         break;
       case GameStatus.EM_ANDAMENTO:
-        this.jogosEmAndamento.update((lista) => this.adicionarOuAtualizar(lista, destinoComStatus));
+        this.jogosEmAndamento.update((lista) => this.adicionarOuAtualizar(lista, jogo));
         break;
       case GameStatus.FINALIZADO:
-        this.jogosEncerrados.update((lista) => this.adicionarOuAtualizar(lista, destinoComStatus));
+        this.jogosEncerrados.update((lista) => this.adicionarOuAtualizar(lista, jogo));
         break;
     }
   }
 
   private removerPorId(lista: game[], id: string): game[] {
-    const proxima = lista.filter((item) => item.id !== id);
-    return proxima.length === lista.length ? lista : proxima;
+    const listaLimpa = lista.filter((jogo, index, self) =>
+        index === self.findIndex((g) => this.mesmoId(g.id ,jogo.id))
+    );
+    return listaLimpa;
   }
 
+
   private adicionarOuAtualizar(lista: game[], jogo: game): game[] {
-    const indice = lista.findIndex((item) => item.id === jogo.id);
+    const semDuplicados = this.removerPorId(lista, jogo.id);
+    return [...semDuplicados, jogo];
+  } 
 
-    if (indice < 0) {
-      return [...lista, jogo];
-    }
+  private mesmoId(idA: unknown, idB: unknown): boolean {
+    return this.normalizarId(idA) === this.normalizarId(idB);
+  }
 
-    const proxima = [...lista];
-    proxima[indice] = jogo;
-    return proxima;
+  private normalizarId(id: unknown): string {
+    return String(id).trim();
   }
 }

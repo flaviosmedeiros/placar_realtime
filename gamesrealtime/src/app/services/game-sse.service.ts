@@ -1,13 +1,13 @@
 import { Injectable, NgZone } from '@angular/core';
 import { game } from '../models/game.model';
 
-type GameUpdate = Partial<game> & { id: string };
 
 type GameSseHandlers = {
-  onNovo: (update: GameUpdate) => void;
-  onInicio: (update: GameUpdate) => void;
-  onPlacar: (update: GameUpdate) => void;
-  onEncerrado: (update: GameUpdate) => void;
+  onNovo: (update: game) => void;
+  onInicio: (update: game) => void;
+  onPlacar: (update: game) => void;
+  onEncerrado: (update: game) => void;
+  onExcluido: (update: game) => void;
   onError?: (event: Event) => void;
 };
 
@@ -20,7 +20,8 @@ export class GameSseService {
     novos: '/sse/games/novos',
     inicio: '/sse/games/inicio',
     placar: '/sse/games/placar',
-    encerrado: '/sse/games/encerrado'
+    encerrado: '/sse/games/encerrado',
+    excluido: '/sse/games/exclusao'
   };
   private sources: EventSource[] = [];
 
@@ -33,7 +34,8 @@ export class GameSseService {
       this.createSource('novos', this.sseEndpoints.novos, handlers.onNovo, handlers.onError),
       this.createSource('inicio', this.sseEndpoints.inicio, handlers.onInicio, handlers.onError),
       this.createSource('placar', this.sseEndpoints.placar, handlers.onPlacar, handlers.onError),
-      this.createSource('encerrado', this.sseEndpoints.encerrado, handlers.onEncerrado, handlers.onError)
+      this.createSource('encerrado', this.sseEndpoints.encerrado, handlers.onEncerrado, handlers.onError),
+      this.createSource('excluido', this.sseEndpoints.excluido, handlers.onExcluido, handlers.onError)
     ];
   }
 
@@ -45,18 +47,12 @@ export class GameSseService {
   private createSource(
     channel: string,
     endpoint: string,
-    handler: (update: GameUpdate) => void,
+    handler: (update: game) => void,
     onError?: (event: Event) => void
   ): EventSource {
     const url = `${this.apiBaseUrl}${endpoint}`;
     const source = new EventSource(url);
-
-    source.onopen = () => {
-      console.info(`[SSE:${channel}] conectado em ${url}`);
-    };
-
-    // Use addEventListener to listen for named events matching the channel name
-    source.addEventListener(channel, (event: MessageEvent) => {
+    const handleMessage = (event: MessageEvent) => {
       const update = this.parseUpdate(event.data);
       if (!update) {
         console.warn(`[SSE:${channel}] mensagem ignorada (payload invalido)`, event.data);
@@ -65,7 +61,15 @@ export class GameSseService {
 
       console.info(`[SSE:${channel}] evento recebido`, update);
       this.zone.run(() => handler(update));
-    });
+    };
+
+    source.onopen = () => {
+      console.info(`[SSE:${channel}] conectado em ${url}`);
+    };
+
+    // Accept named events and generic "message" events.
+    source.addEventListener(channel, handleMessage);
+    source.onmessage = handleMessage;
 
     source.onerror = (event) => {
       console.error(`[SSE:${channel}] erro na conexao`, event);
@@ -77,9 +81,9 @@ export class GameSseService {
     return source;
   }
 
-  private parseUpdate(raw: string): GameUpdate | null {
+  private parseUpdate(raw: string): game | null {
     try {
-      const parsed = JSON.parse(raw) as GameUpdate;
+      const parsed = JSON.parse(raw) as game;
       return this.normalizeUpdate(parsed);
     } catch (error) {
       console.error('Mensagem SSE invalida', error);
@@ -87,12 +91,17 @@ export class GameSseService {
     }
   }
 
-  private normalizeUpdate(update: GameUpdate): GameUpdate {
+  private normalizeUpdate(update: game): game {
     return {
       ...update,
-      dataHoraInicioPartida: this.parseDate(update.dataHoraInicioPartida),
+      id: this.normalizeId(update.id),
+      dataHoraInicioPartida: this.parseDate(update.dataHoraInicioPartida)!,
       dataHoraEncerramento: this.parseDate(update.dataHoraEncerramento)
     };
+  }
+
+  private normalizeId(value: string | number): string {
+    return String(value).trim();
   }
 
   private parseDate(value: unknown): Date | undefined {

@@ -44,7 +44,7 @@
                 <span class="versus">x</span>
                 <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <span class="status-badge status-badge--novo">{{ jogo.status }}</span>
+              <span class="status-badge status-badge--novo">{{ formatarStatus(jogo.status) }}</span>
             </div>
             <div class="score">
               <span>{{ jogo.placarA }}</span>
@@ -58,7 +58,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">Status</span>
-                <span class="meta-value">{{ jogo.status }}</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
               </div>
             </div>
           </article>
@@ -89,7 +89,7 @@
                 <span class="versus">x</span>
                 <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <span class="status-badge status-badge--live">{{ jogo.status }}</span>
+              <span class="status-badge status-badge--live">{{ formatarStatus(jogo.status) }}</span>
             </div>
             <div class="score score--live">
               <span>{{ jogo.placarA }}</span>
@@ -107,7 +107,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">Status</span>
-                <span class="meta-value">{{ jogo.status }}</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
               </div>
             </div>
           </article>
@@ -138,7 +138,7 @@
                 <span class="versus">x</span>
                 <span class="team">{{ jogo.timeB }}</span>
               </div>
-              <span class="status-badge status-badge--closed">{{ jogo.status }}</span>
+              <span class="status-badge status-badge--closed">{{ formatarStatus(jogo.status) }}</span>
             </div>
             <div class="score">
               <span>{{ jogo.placarA }}</span>
@@ -152,7 +152,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">Status</span>
-                <span class="meta-value">{{ jogo.status }}</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
               </div>
             </div>
           </article>

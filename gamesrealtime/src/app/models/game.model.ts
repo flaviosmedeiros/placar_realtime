@@ -13,5 +13,5 @@ export interface game {
   status: string;
   tempoDeJogo: number;
   dataHoraInicioPartida: Date;
-  dataHoraEncerramento: Date;
+  dataHoraEncerramento?: Date;
 }
