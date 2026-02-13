@@ -1,6 +1,5 @@
 package br.com.solides.placar.shared.dto;
 
-import br.com.solides.placar.shared.enums.StatusJogo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * DTO para alteração de status de um jogo.
+ * DTO para finalizar um jogo.
+ * Transição de status EM_ANDAMENTO -> FINALIZADO.
  * 
  * @author Copilot
  * @since 1.0.0
@@ -19,13 +19,18 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlterarStatusDTO implements Serializable {
+public class FinalizaJogoDTO implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
     /**
-     * Novo status do jogo
+     * ID do jogo a ser finalizado
      */
-    @NotNull(message = "Status é obrigatório")
-    private StatusJogo status;
+    @NotNull(message = "ID do jogo é obrigatório")
+    private Long jogoId;
+
+    /**
+     * Observações sobre o encerramento do jogo (opcional)
+     */
+    private String observacoes;
 }

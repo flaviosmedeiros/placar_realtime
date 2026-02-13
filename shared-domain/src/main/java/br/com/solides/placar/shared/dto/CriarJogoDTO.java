@@ -1,14 +1,15 @@
 package br.com.solides.placar.shared.dto;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  * DTO para criação de um novo jogo.
@@ -20,6 +21,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(
+    name = "CriarJogoDTO", 
+    description = "Dados necessários para criar um novo jogo"
+)
 public class CriarJogoDTO implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -28,17 +33,25 @@ public class CriarJogoDTO implements Serializable {
      * Nome do time A
      */
     @NotBlank(message = "Time A é obrigatório")
+    @Schema(description = "Nome do primeiro time", example = "Flamengo", required = true)
     private String timeA;
 
     /**
      * Nome do time B
      */
     @NotBlank(message = "Time B é obrigatório")
+    @Schema(description = "Nome do segundo time", example = "Vasco", required = true)
     private String timeB;
 
     /**
-     * Data e hora de início da partida
+     * Data da partida (formato LocalDate para interface)
      */
-    @NotNull(message = "Data e hora de início da partida é obrigatória")
-    private LocalDateTime dataHoraInicioPartida;
+    @Schema(description = "Data da partida", example = "2026-02-12", format = "date")
+    private LocalDate dataPartida;
+
+    /**
+     * Hora da partida (formato string HH:mm para interface)
+     */
+    @Schema(description = "Horário da partida", example = "20:30", pattern = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+    private String horaPartida;
 }

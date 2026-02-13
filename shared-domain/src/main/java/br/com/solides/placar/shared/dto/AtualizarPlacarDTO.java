@@ -24,6 +24,12 @@ public class AtualizarPlacarDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * ID do jogo a ter o placar atualizado
+     */
+    @NotNull(message = "ID do jogo é obrigatório")
+    private Long jogoId;
+
+    /**
      * Novo placar do time A
      */
     @NotNull(message = "Placar A é obrigatório")
