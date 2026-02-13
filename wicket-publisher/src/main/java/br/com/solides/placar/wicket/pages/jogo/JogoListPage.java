@@ -9,11 +9,7 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -27,13 +23,13 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 
 import br.com.solides.placar.service.JogoService;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.dto.JogoFilterDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
 import br.com.solides.placar.util.DateTimeConstants;
+import br.com.solides.placar.wicket.BaseWebPage;
 import br.com.solides.placar.wicket.components.modal.CriarJogoModal;
 import br.com.solides.placar.wicket.components.modal.EditarJogoModal;
 import br.com.solides.placar.wicket.components.modal.ExcluirJogoModal;
@@ -48,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 1.0.0
  */
 @Slf4j
-public class JogoListPage extends WebPage {
+public class JogoListPage extends BaseWebPage {
 
     private static final long serialVersionUID = 1L;
 
@@ -74,20 +70,6 @@ public class JogoListPage extends WebPage {
     private FeedbackPanel feedbackPanel;
 
     
-    @Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		
-	    response.render(
-	    		CssHeaderItem.forReference(new PackageResourceReference(JogoListPage.class, "bootstrap-icons/bootstrap-icons.min.css")	     
-	    ));
-
-		response.render(
-				CssHeaderItem.forUrl("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"));		
-
-		response.render(
-				JavaScriptHeaderItem.forUrl("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"));
-	}
     
    
     public JogoListPage() {
@@ -238,8 +220,7 @@ public class JogoListPage extends WebPage {
                 
                 // Botões de ação
                 criarBotoesAcao(item, jogo);
-            }
-            
+            }            
         };
 
         
@@ -260,40 +241,55 @@ public class JogoListPage extends WebPage {
     }
 
     
-    private void criarBotoesAcao(ListItem<JogoDTO> item, JogoDTO jogo) {
-        // Botão Editar
-        AjaxLink<Void> botaoEditar = new AjaxLink<Void>("botaoEditar") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                log.info("Editando jogo ID: {}", jogo.getId());
+    private void criarBotoesAcao(ListItem<JogoDTO> item, JogoDTO jogo) {   	
+    	
+    		
+    		
+    		// Botão Editar
+            AjaxLink<Void> botaoEditar = new AjaxLink<Void>("botaoEditar") {
+                @Override
+                public void onClick(AjaxRequestTarget target) {
+                    log.info("Editando jogo ID: {}", jogo.getId());
+                    
+                    // Carregar dados do jogo no modal
+                    editarJogoModal.carregarJogo(jogo);
+                    target.add(editarJogoModal);
+                    
+                    // Abrir modal
+                    target.appendJavaScript("$('#modalEditarJogo').modal('show');");
+                }
                 
-                // Carregar dados do jogo no modal
-                editarJogoModal.carregarJogo(jogo);
-                target.add(editarJogoModal);
+                @Override
+                public boolean isVisible() {
+                    return jogo != null && jogo.getStatus() == StatusJogo.NAO_INICIADO;
+                }
+            };
+            item.add(botaoEditar);            
+            
+            
+            // Botão Excluir
+            AjaxLink<Void> botaoExcluir = new AjaxLink<Void>("botaoExcluir") {
+                @Override
+                public void onClick(AjaxRequestTarget target) {
+                    log.info("Preparando exclusão do jogo ID: {}", jogo.getId());
+                    
+                    // Definir jogo para exclusão no modal
+                    excluirJogoModal.setJogoParaExcluir(jogo);
+                    target.add(excluirJogoModal);
+                    
+                    // Abrir modal
+                    target.appendJavaScript("$('#modalExcluirJogo').modal('show');");
+                }
                 
-                // Abrir modal
-                target.appendJavaScript("$('#modalEditarJogo').modal('show');");
-            }
-        };
-        item.add(botaoEditar);
-
-        // Botão Excluir
-        AjaxLink<Void> botaoExcluir = new AjaxLink<Void>("botaoExcluir") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                log.info("Preparando exclusão do jogo ID: {}", jogo.getId());
-                
-                // Definir jogo para exclusão no modal
-                excluirJogoModal.setJogoParaExcluir(jogo);
-                target.add(excluirJogoModal);
-                
-                // Abrir modal
-                target.appendJavaScript("$('#modalExcluirJogo').modal('show');");
-            }
-        };
-        item.add(botaoExcluir);
+                @Override
+                public boolean isVisible() {
+                    return jogo != null && jogo.getStatus() == StatusJogo.NAO_INICIADO;
+                }
+            };
+            item.add(botaoExcluir);            
+    	
+    	       
         
-         
         
 		item.add(new Link<Void>("botaoGestao") {
 			@Override
@@ -305,10 +301,17 @@ public class JogoListPage extends WebPage {
 
 				setResponsePage(GestaoJogoPage.class, params);
 			}
+			
+			@Override
+            public boolean isVisible() {
+                return jogo != null && jogo.getStatus() != StatusJogo.FINALIZADO;
+            }
 		});
 
     }
 
+    
+    
     private void criarBotaoAdicionar() {
         AjaxLink<Void> botaoAdicionar = new AjaxLink<Void>("botaoAdicionar") {
             @Override

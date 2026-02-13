@@ -22,8 +22,6 @@ import org.apache.wicket.model.Model;
 import br.com.solides.placar.service.JogoService;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
-import br.com.solides.placar.util.DateTimeConstants;
-import br.com.solides.placar.util.PublisherUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -97,18 +95,23 @@ public class EditarJogoModal extends Panel {
 		NumberTextField<Integer> campoPlacarA = new NumberTextField<>("placarA");
 		campoPlacarA.setMinimum(0);
 		campoPlacarA.setLabel(Model.of("Placar A"));
+		campoPlacarA.setEnabled(false); // Desabilita o campo
+		campoPlacarA.add(AttributeModifier.replace("readonly", "readonly"));
 		form.add(campoPlacarA);
 
 		// Placar B
 		NumberTextField<Integer> campoPlacarB = new NumberTextField<>("placarB");
 		campoPlacarB.setMinimum(0);
 		campoPlacarB.setLabel(Model.of("Placar B"));
+		campoPlacarB.setEnabled(false); // Desabilita o campo
+		campoPlacarB.add(AttributeModifier.replace("readonly", "readonly"));
 		form.add(campoPlacarB);
 
 		// Status
 		List<StatusJogo> statusOptions = Arrays.asList(StatusJogo.values());
 		DropDownChoice<StatusJogo> campoStatus = new DropDownChoice<>("status", statusOptions);
 		campoStatus.setRequired(true);
+		campoStatus.setEnabled(false); // Torna o campo readonly/disabled
 		form.add(campoStatus);
 
 		// Data da Partida
@@ -231,45 +234,17 @@ public class EditarJogoModal extends Panel {
 		public JogoDTO toJogoDTO() {
 			try {
 
-				return JogoDTO.builder().id(id).timeA(timeA).timeB(timeB).placarA(placarA).placarB(placarB)
-						.status(status).dataPartida(dataPartida).horaPartida(horaPartidaStr)
-						.tempoDeJogo(gerarTempoDeJogo(this)).dataCriacao(dataCriacao).dataAtualizacao(dataAtualizacao)
+				return JogoDTO.builder().id(id).timeA(timeA).timeB(timeB)
+						.placarA(0).placarB(0)
+						.status(StatusJogo.NAO_INICIADO)
+						.dataPartida(dataPartida).horaPartida(horaPartidaStr)
+						.tempoDeJogo(0)
 						.build();
 			} catch (Exception e) {
 				throw new IllegalArgumentException(
 						"Formato de data ou hora inválido. Use YYYY-MM-DD para data e HH:MM para hora.", e);
 			}
-		}
-
-		private Integer gerarTempoDeJogo(EditarJogoForm entity) {
-			Integer tempoDeJogo = 0;
-
-			// Construir LocalDateTime a partir dos campos de data e hora
-			if (!PublisherUtils.nuloOuVazio(entity.getDataPartida())
-					&& !PublisherUtils.nuloOuVazio(entity.getHoraPartidaStr())) {
-				try {
-					LocalDateTime dataHoraPartida = LocalDateTime.of(entity.getDataPartida(),
-							java.time.LocalTime.parse(entity.getHoraPartidaStr(), DateTimeConstants.TIME_FORMAT));
-
-					if (entity.getStatus() == StatusJogo.EM_ANDAMENTO) {
-						LocalDateTime agora = LocalDateTime.now();
-						tempoDeJogo = (int) java.time.Duration.between(dataHoraPartida, agora).toMinutes();
-					} else if (entity.getStatus() == StatusJogo.FINALIZADO) {
-						// Para jogos finalizados, usar dataAtualizacao como aproximação do encerramento
-						// ou calcular um tempo padrão de 90 minutos se não houver dataAtualizacao
-						LocalDateTime dataEncerramento = entity.getDataAtualizacao() != null
-								? entity.getDataAtualizacao()
-								: dataHoraPartida.plusMinutes(90); // Tempo padrão de jogo
-						tempoDeJogo = (int) java.time.Duration.between(dataHoraPartida, dataEncerramento).toMinutes();
-					}
-				} catch (Exception e) {
-					// Em caso de erro na conversão, retorna 0
-					tempoDeJogo = 0;
-				}
-			}
-
-			return tempoDeJogo;
-		}
+		}		
 
 		// Getters e Setters
 		public Long getId() {

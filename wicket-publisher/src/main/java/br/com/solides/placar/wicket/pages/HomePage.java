@@ -2,13 +2,13 @@ package br.com.solides.placar.wicket.pages;
 
 import java.time.LocalDateTime;
 
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import br.com.solides.placar.util.DateTimeConstants;
+import br.com.solides.placar.wicket.BaseWebPage;
 import br.com.solides.placar.wicket.pages.jogo.JogoListPage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
  * a integração com Bootstrap para responsividade.
  */
 @Slf4j
-public class HomePage extends WebPage {
+public class HomePage extends BaseWebPage {
     
     private static final long serialVersionUID = 1L;
     

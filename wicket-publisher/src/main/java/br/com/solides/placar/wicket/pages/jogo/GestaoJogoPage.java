@@ -1,13 +1,11 @@
 package br.com.solides.placar.wicket.pages.jogo;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.NumberTextField;
@@ -19,6 +17,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import br.com.solides.placar.service.JogoService;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
+import br.com.solides.placar.util.PublisherUtils;
+import br.com.solides.placar.wicket.BaseWebPage;
 import br.com.solides.placar.wicket.components.modal.AtualizarPlacarModal;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 1.0.0
  */
 @Slf4j
-public class GestaoJogoPage extends WebPage {
-
+public class GestaoJogoPage extends BaseWebPage {
     private static final long serialVersionUID = 1L;
 
     @Inject
@@ -47,22 +46,7 @@ public class GestaoJogoPage extends WebPage {
     private Form<JogoVisualizacaoForm> formVisualizacao;
     private JogoVisualizacaoForm visualizacaoForm;
 
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        
-        // Bootstrap CSS
-        response.render(
-            CssHeaderItem.forUrl("https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"));      
-
-        // Bootstrap Icons
-        response.render(
-            CssHeaderItem.forUrl("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"));
-
-        // Bootstrap JS
-        response.render(
-            JavaScriptHeaderItem.forUrl("https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"));
-    }
+    
 
     public GestaoJogoPage(PageParameters parameters) {
         super(parameters);
@@ -125,16 +109,14 @@ public class GestaoJogoPage extends WebPage {
         add(botaoVoltar);
         
         // Form de visualização
-        criarFormVisualizacao();
-        
-        // Toolbar com botões de ação
-        criarToolbar();
+        criarFormVisualizacao();       
         
         // Modal para atualizar placar
         criarModal();
     }
 
     private void criarFormVisualizacao() {
+    	
         formVisualizacao = new Form<>("formVisualizacao", new CompoundPropertyModel<>(visualizacaoForm));
         
         // Campos do jogo (somente leitura)
@@ -174,11 +156,17 @@ public class GestaoJogoPage extends WebPage {
         campoTempoJogo.setEnabled(false);
         formVisualizacao.add(campoTempoJogo);
         
-        formVisualizacao.setOutputMarkupId(true);
+        formVisualizacao.setOutputMarkupId(true);        
+        
+        // Toolbar com botões de ação
+        criarToolbar();        
+        
         add(formVisualizacao);
     }
 
     private void criarToolbar() {
+    	
+    	
         // Botão Iniciar Jogo
         AjaxLink<Void> botaoIniciar = new AjaxLink<Void>("botaoIniciar") {
             @Override
@@ -208,8 +196,11 @@ public class GestaoJogoPage extends WebPage {
         };
         botaoIniciar.setOutputMarkupId(true);
         botaoIniciar.setOutputMarkupPlaceholderTag(true);
-        add(botaoIniciar);
+        formVisualizacao.add(botaoIniciar);
 
+        
+        
+        
         // Botão Finalizar Jogo
         AjaxLink<Void> botaoFinalizar = new AjaxLink<Void>("botaoFinalizar") {
             @Override
@@ -239,8 +230,12 @@ public class GestaoJogoPage extends WebPage {
         };
         botaoFinalizar.setOutputMarkupId(true);
         botaoFinalizar.setOutputMarkupPlaceholderTag(true);
-        add(botaoFinalizar);
+        
+        formVisualizacao.add(botaoFinalizar);
 
+        
+        
+        
         // Botão Atualizar Placar
         AjaxLink<Void> botaoAtualizarPlacar = new AjaxLink<Void>("botaoAtualizarPlacar") {
             @Override
@@ -258,9 +253,18 @@ public class GestaoJogoPage extends WebPage {
         };
         botaoAtualizarPlacar.setOutputMarkupId(true);
         botaoAtualizarPlacar.setOutputMarkupPlaceholderTag(true);
-        add(botaoAtualizarPlacar);
+        
+        formVisualizacao.add(botaoAtualizarPlacar);
     }
 
+    
+    
+    
+    
+    
+    
+    
+    
     private void criarModal() {
         // Modal Atualizar Placar
         atualizarPlacarModal = new AtualizarPlacarModal("atualizarPlacarModal", new AtualizarPlacarModal.ModalCallback() {
@@ -312,10 +316,11 @@ public class GestaoJogoPage extends WebPage {
             this.statusLabel = getStatusLabel(jogo.getStatus());
             this.dataPartidaStr = jogo.getDataPartida() != null ? jogo.getDataPartida().toString() : "-";
             this.horaPartida = jogo.getHoraPartida() != null ? jogo.getHoraPartida() : "-";
-            this.tempoDeJogo = jogo.getTempoDeJogo() != null ? jogo.getTempoDeJogo() : 0;
-        }
-        
-        private String getStatusLabel(StatusJogo status) {
+            this.tempoDeJogo = calculateTempoDeJogo(jogo);
+        }       
+       
+
+		private String getStatusLabel(StatusJogo status) {
             switch (status) {
                 case NAO_INICIADO:
                     return "Não Iniciado";
@@ -355,5 +360,45 @@ public class GestaoJogoPage extends WebPage {
         
         public Integer getTempoDeJogo() { return tempoDeJogo; }
         public void setTempoDeJogo(Integer tempoDeJogo) { this.tempoDeJogo = tempoDeJogo; }
+        
+        
+        private Integer calculateTempoDeJogo(JogoDTO jogo) {
+        	if (jogo.getStatus() == StatusJogo.NAO_INICIADO) {
+                return 0;
+            }
+        	
+        	try {
+        	
+        		// Verifica se temos os dados necessários
+                if (PublisherUtils.nuloOuVazio(jogo.getDataPartida()) || PublisherUtils.nuloOuVazio(jogo.getHoraPartida())) {
+                    return jogo.getTempoDeJogo() != null ? jogo.getTempoDeJogo() : 0;
+                }
+                
+	        	LocalDateTime dataHoraInicio = PublisherUtils.construirDataHoraPartida(jogo.getDataPartida(), jogo.getHoraPartida());
+	        	LocalDateTime agora = LocalDateTime.now();
+	            
+	            // Se o jogo ainda não começou (data/hora futura), retorna 0
+	            if (dataHoraInicio.isAfter(agora)) {
+	                return 0;
+	            }          
+                
+                // Calcula a duração em minutos
+                Duration duracao = Duration.between(dataHoraInicio, agora);
+                long minutosDecorridos = duracao.toMinutes();
+                
+                // Para jogos finalizados, usa a data de encerramento se disponível
+                if (jogo.getStatus() == StatusJogo.FINALIZADO && !PublisherUtils.nuloOuVazio(jogo.getDataHoraEncerramento())) {
+                    Duration duracaoFinal = Duration.between(dataHoraInicio, jogo.getDataHoraEncerramento());
+                    minutosDecorridos = duracaoFinal.toMinutes();
+                }
+                
+                return (int) Math.max(0, minutosDecorridos);
+                
+            } catch (Exception e) {
+            	return jogo.getTempoDeJogo() != null ? jogo.getTempoDeJogo() : 0;
+            }
+		}
+        
     }
+   
 }

@@ -41,6 +41,7 @@ public class JogoRepository {
         
         if (jogo.getId() == null) {
             entityManager.persist(jogo);
+            entityManager.flush();
             log.info("Jogo criado com ID: {}", jogo.getId());
             return jogo;
         } else {

@@ -3,8 +3,14 @@ package br.com.solides.placar.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
+
 import br.com.solides.placar.entity.Jogo;
-import br.com.solides.placar.event.internal.*;
+import br.com.solides.placar.event.internal.JogoAtualizadoEvent;
+import br.com.solides.placar.event.internal.JogoCriadoEvent;
+import br.com.solides.placar.event.internal.JogoFinalizadoEvent;
+import br.com.solides.placar.event.internal.JogoIniciadoEvent;
+import br.com.solides.placar.event.internal.PlacarAtualizadoInternalEvent;
 import br.com.solides.placar.mapper.JogoMapper;
 import br.com.solides.placar.repository.JogoRepository;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
@@ -13,7 +19,6 @@ import br.com.solides.placar.shared.dto.JogoFilterDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
 import br.com.solides.placar.shared.exception.BusinessException;
 import br.com.solides.placar.shared.exception.EntityNotFoundException;
-import br.com.solides.placar.util.DateTimeConstants;
 import br.com.solides.placar.util.PublisherUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,7 +26,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Serviço de domínio para operações com Jogos.
@@ -42,6 +46,9 @@ public class JogoService {
     
     @Inject
     private ApplicationEventPublisher eventPublisher;
+    
+    // Constantes de mensagens
+    private static final String MSG_JOGO_NAO_ENCONTRADO = "Jogo não encontrado com ID: ";
 
     /**
      * Cria um novo jogo
@@ -63,7 +70,7 @@ public class JogoService {
         
         // Converter para DTO e disparar evento após persistência bem-sucedida
         JogoDTO jogoDTO = jogoMapper.toDTO(jogoSalvo);
-        eventPublisher.publishEvent(new JogoCriadoEvent(jogoDTO));
+        eventPublisher.publishEvent(new JogoCriadoEvent(this, jogoDTO));
         
         return jogoDTO;
     }
@@ -165,7 +172,7 @@ public class JogoService {
         log.info("Finalizando jogo ID: {}", jogoId);
         
         Jogo jogo = jogoRepository.findById(jogoId)
-            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
+            .orElseThrow(() -> new EntityNotFoundException(MSG_JOGO_NAO_ENCONTRADO + jogoId));
         
         // Validar se o jogo pode ser finalizado
         if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
@@ -195,7 +202,7 @@ public class JogoService {
         log.info("Iniciando jogo ID: {}", jogoId);
         
         Jogo jogo = jogoRepository.findById(jogoId)
-            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
+            .orElseThrow(() -> new EntityNotFoundException(MSG_JOGO_NAO_ENCONTRADO + jogoId));
         
         // Validar se o jogo pode ser iniciado
         if (jogo.getStatus() != StatusJogo.NAO_INICIADO) {
@@ -227,7 +234,7 @@ public class JogoService {
         log.info("Atualizando placar do jogo ID: {} - {} x {}", jogoId, placarA, placarB);
         
         Jogo jogo = jogoRepository.findById(jogoId)
-            .orElseThrow(() -> new EntityNotFoundException("Jogo não encontrado com ID: " + jogoId));
+            .orElseThrow(() -> new EntityNotFoundException(MSG_JOGO_NAO_ENCONTRADO + jogoId));
         
         // Validar se o jogo pode ter placar atualizado
         if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
@@ -254,7 +261,7 @@ public class JogoService {
         return jogoDTO;
     }
 
-    // --- Métodos privados de validação ---
+
 
     private void validarCriacaoJogo(CriarJogoDTO criarDTO) {
         // Validar times diferentes
@@ -264,12 +271,9 @@ public class JogoService {
         
         // Validar data/hora da partida
         if (!PublisherUtils.nuloOuVazio(criarDTO.getDataPartida()) && !PublisherUtils.nuloOuVazio(criarDTO.getHoraPartida())) {
-            try {
-                LocalDateTime dataHoraPartida = LocalDateTime.of(
-                    criarDTO.getDataPartida(), 
-                    java.time.LocalTime.parse(criarDTO.getHoraPartida(), DateTimeConstants.TIME_FORMAT)
-                );
-                if (dataHoraPartida.isBefore(LocalDateTime.now().minusHours(1))) {
+            try {                
+                LocalDateTime dataHoraPartida = PublisherUtils.construirDataHoraPartida(criarDTO.getDataPartida(), criarDTO.getHoraPartida());
+                if (dataHoraPartida.isBefore(LocalDateTime.now())) {
                     throw new BusinessException("Data/hora da partida não pode ser no passado");
                 }
             } catch (java.time.format.DateTimeParseException e) {
@@ -280,10 +284,15 @@ public class JogoService {
         }
     }
 
+    
     private void validarAtualizacaoJogo(JogoDTO jogoDTO, Jogo jogoExistente) {
         // Não permitir alterar jogo finalizado
         if (jogoExistente.getStatus() == StatusJogo.FINALIZADO) {
             throw BusinessException.jogoJaFinalizado(jogoExistente.getId());
+        }
+        
+        if (jogoExistente.getStatus() == StatusJogo.EM_ANDAMENTO) {
+            throw BusinessException.jogoJaEndamento(jogoExistente.getId());
         }
         
         // Validar times diferentes
@@ -297,18 +306,20 @@ public class JogoService {
         }
         
         // Validar transições de status
-        validarTransicaoStatus(jogoExistente.getStatus(), jogoDTO.getStatus(), jogoDTO.getId());
+        validarTransicaoStatus(jogoExistente.getStatus(), jogoDTO.getStatus());
     }
 
-    private void validarRemocaoJogo(Jogo jogo) {       
+    private void validarRemocaoJogo(Jogo jogo) {     
+    	if (jogo.getStatus() != StatusJogo.NAO_INICIADO) {
+             throw new BusinessException("Apenas Jogo não iniciado pode ser removido. Status atual: " + jogo.getStatus());
+        }
         log.debug("Validação de remoção passou para jogo ID: {}", jogo.getId());
     }
 
-    private void validarTransicaoStatus(StatusJogo statusAtual, StatusJogo novoStatus, Long jogoId) {
+    private void validarTransicaoStatus(StatusJogo statusAtual, StatusJogo novoStatus) {
         if (statusAtual == novoStatus) {
             return; // Mesma situação, ok
-        }
-        
+        }        
         // Regras de transição
         switch (statusAtual) {
             case NAO_INICIADO:

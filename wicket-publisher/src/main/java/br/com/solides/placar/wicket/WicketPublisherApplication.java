@@ -18,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WicketPublisherApplication extends WebApplication {
 
+    // Constantes de URLs
+    private static final String CDN_JSDELIVR_NET_URL = "https://cdn.jsdelivr.net";
+
     @Override
     public void init() {
         super.init();
@@ -68,11 +71,11 @@ public class WicketPublisherApplication extends WebApplication {
                 .blocking();
         cfg.unsafeInline();
         
-        cfg.add(CSPDirective.STYLE_SRC, "https://cdn.jsdelivr.net");
-        cfg.add(CSPDirective.SCRIPT_SRC, "https://cdn.jsdelivr.net");
-        cfg.add(CSPDirective.FONT_SRC, "https://cdn.jsdelivr.net");
+        cfg.add(CSPDirective.STYLE_SRC, CDN_JSDELIVR_NET_URL);
+        cfg.add(CSPDirective.SCRIPT_SRC, CDN_JSDELIVR_NET_URL);
+        cfg.add(CSPDirective.FONT_SRC, CDN_JSDELIVR_NET_URL);
         cfg.add(CSPDirective.IMG_SRC, "data:");
-        cfg.add(CSPDirective.IMG_SRC, "https://cdn.jsdelivr.net");
+        cfg.add(CSPDirective.IMG_SRC, CDN_JSDELIVR_NET_URL);
         
         mountPage("/jogos/lista", JogoListPage.class);
         mountPage("/jogos/gerenciar", GestaoJogoPage.class);
