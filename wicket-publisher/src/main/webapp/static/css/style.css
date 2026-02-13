@@ -1,0 +1,10 @@
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.fadeOut-animation {
+  animation-name: fadeOut;
+  animation-duration: 0.5s; /* Adjust duration as needed */
+  animation-fill-mode: both; /* Ensures element stays hidden at the end */
+}

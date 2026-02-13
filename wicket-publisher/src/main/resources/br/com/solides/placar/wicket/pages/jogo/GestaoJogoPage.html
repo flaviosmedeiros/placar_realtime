@@ -28,7 +28,8 @@
         </div>
 
         <!-- Feedback Panel -->
-        <div wicket:id="feedback"></div>
+        <div wicket:id="feedback" class="feedback-panel alert alert-secondary fadeOut-animation">
+        </div>
 
         <!-- Formulário de Visualização do Jogo -->
         <div class="row">
@@ -40,7 +41,7 @@
                             Informações do Jogo
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" >
                         <form wicket:id="formVisualizacao">
                             <div class="row g-3">
                                 <!-- ID do Jogo -->
@@ -127,63 +128,47 @@
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            
+                            
+                            <div class="row mt-5">
+					            <div class="col-12">			                    
+					                    
+			                        <div class="d-flex gap-3 justify-content-center">
+			                            <!-- Botão Iniciar Jogo -->
+			                            <a href="#" 
+			                               class="btn btn-success btn-lg" 
+			                               wicket:id="botaoIniciar">
+			                                <i class="bi bi-play-circle me-2"></i>
+			                                Iniciar Jogo
+			                            </a>
+			                            
+			                            <!-- Botão Finalizar Jogo -->
+			                            <a href="#" 
+			                               class="btn btn-danger btn-lg" 
+			                               wicket:id="botaoFinalizar">
+			                                <i class="bi bi-stop-circle me-2"></i>
+			                                Finalizar Jogo
+			                            </a>
+			                            
+			                            <!-- Botão Atualizar Placar -->
+			                            <a href="#" 
+			                               class="btn btn-primary btn-lg" 
+			                               wicket:id="botaoAtualizarPlacar">
+			                                <i class="bi bi-plus-square me-2"></i>
+			                                Atualizar Placar
+			                            </a>
+			                        </div>
+					                    
+					                
+					            </div>
+					        </div>
+                        </form>                      
+				                        
                     </div>
                 </div>
             </div>
-        </div>
+        </div>    
 
-        <!-- Toolbar de Ações -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-gear-fill me-2"></i>
-                            Ações de Controle
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex gap-3 justify-content-center">
-                            <!-- Botão Iniciar Jogo -->
-                            <a href="#" 
-                               class="btn btn-success btn-lg" 
-                               wicket:id="botaoIniciar">
-                                <i class="bi bi-play-circle me-2"></i>
-                                Iniciar Jogo
-                            </a>
-                            
-                            <!-- Botão Finalizar Jogo -->
-                            <a href="#" 
-                               class="btn btn-danger btn-lg" 
-                               wicket:id="botaoFinalizar">
-                                <i class="bi bi-stop-circle me-2"></i>
-                                Finalizar Jogo
-                            </a>
-                            
-                            <!-- Botão Atualizar Placar -->
-                            <a href="#" 
-                               class="btn btn-primary btn-lg" 
-                               wicket:id="botaoAtualizarPlacar">
-                                <i class="bi bi-plus-square me-2"></i>
-                                Atualizar Placar
-                            </a>
-                        </div>
-                        
-                        <!-- Informações sobre os botões -->
-                        <div class="alert alert-info mt-3">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Instruções:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li><strong>Iniciar Jogo:</strong> Atualiza status para "Em Andamento" e zera placar</li>
-                                <li><strong>Finalizar Jogo:</strong> Atualiza status para "Finalizado" e registra data/hora de término</li>
-                                <li><strong>Atualizar Placar:</strong> Permite alterar placar dos times durante o jogo</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Modal para atualizar placar -->
