@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import br.com.solides.placar.entity.Jogo;
+import br.com.solides.placar.event.internal.*;
 import br.com.solides.placar.mapper.JogoMapper;
 import br.com.solides.placar.repository.JogoRepository;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
@@ -20,6 +21,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Serviço de domínio para operações com Jogos.
@@ -37,6 +39,9 @@ public class JogoService {
     
     @Inject
     private JogoMapper jogoMapper;
+    
+    @Inject
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * Cria um novo jogo
@@ -55,7 +60,12 @@ public class JogoService {
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Jogo criado com sucesso, ID: {}", jogoSalvo.getId());
-        return jogoMapper.toDTO(jogoSalvo);
+        
+        // Converter para DTO e disparar evento após persistência bem-sucedida
+        JogoDTO jogoDTO = jogoMapper.toDTO(jogoSalvo);
+        eventPublisher.publishEvent(new JogoCriadoEvent(jogoDTO));
+        
+        return jogoDTO;
     }
 
     /**
@@ -111,7 +121,12 @@ public class JogoService {
         Jogo jogoAtualizado = jogoRepository.save(jogoExistente);
         
         log.info("Jogo atualizado com sucesso, ID: {}", jogoAtualizado.getId());
-        return jogoMapper.toDTO(jogoAtualizado);
+        
+        // Converter para DTO e disparar evento após persistência bem-sucedida
+        JogoDTO jogoAtualizadoDTO = jogoMapper.toDTO(jogoAtualizado);
+        eventPublisher.publishEvent(new JogoAtualizadoEvent(jogoAtualizadoDTO));
+        
+        return jogoAtualizadoDTO;
     }
 
     /**
@@ -164,7 +179,12 @@ public class JogoService {
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Jogo ID: {} finalizado com sucesso", jogoId);
-        return jogoMapper.toDTO(jogoSalvo);
+        
+        // Converter para DTO e disparar evento após persistência bem-sucedida
+        JogoDTO jogoDTO = jogoMapper.toDTO(jogoSalvo);
+        eventPublisher.publishEvent(new JogoFinalizadoEvent(jogoDTO));
+        
+        return jogoDTO;
     }
 
     /**
@@ -191,7 +211,12 @@ public class JogoService {
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Jogo ID: {} iniciado com sucesso", jogoId);
-        return jogoMapper.toDTO(jogoSalvo);
+        
+        // Converter para DTO e disparar evento após persistência bem-sucedida
+        JogoDTO jogoDTO = jogoMapper.toDTO(jogoSalvo);
+        eventPublisher.publishEvent(new JogoIniciadoEvent(jogoDTO));
+        
+        return jogoDTO;
     }
     
     /**
@@ -221,8 +246,12 @@ public class JogoService {
         Jogo jogoSalvo = jogoRepository.save(jogo);
         
         log.info("Placar do jogo ID: {} atualizado com sucesso - {} x {}", jogoId, placarA, placarB);
+        
+        // Converter para DTO e disparar evento após persistência bem-sucedida
+        JogoDTO jogoDTO = jogoMapper.toDTO(jogoSalvo);
+        eventPublisher.publishEvent(new PlacarAtualizadoInternalEvent(jogoDTO));
        
-        return jogoMapper.toDTO(jogoSalvo);
+        return jogoDTO;
     }
 
     // --- Métodos privados de validação ---

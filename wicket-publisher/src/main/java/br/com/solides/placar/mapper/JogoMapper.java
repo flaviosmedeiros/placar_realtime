@@ -1,8 +1,6 @@
 package br.com.solides.placar.mapper;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 import br.com.solides.placar.entity.Jogo;
@@ -73,7 +71,7 @@ public class JogoMapper {
             return null;
         }
 
-        LocalDateTime dataHoraPartida = construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
+        LocalDateTime dataHoraPartida = PublisherUtils.construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
 
         return Jogo.builder()
                 .id(dto.getId())
@@ -97,7 +95,7 @@ public class JogoMapper {
             return null;
         }
 
-        LocalDateTime dataHoraPartida = construirDataHoraPartida(criarDTO.getDataPartida(), criarDTO.getHoraPartida());
+        LocalDateTime dataHoraPartida = PublisherUtils.construirDataHoraPartida(criarDTO.getDataPartida(), criarDTO.getHoraPartida());
 
         return Jogo.builder()
                 .timeA(criarDTO.getTimeA())
@@ -127,7 +125,7 @@ public class JogoMapper {
         entity.setDataAtualizacao(LocalDateTime.now());
         
         // Atualizar dataHoraPartida
-        LocalDateTime dataHoraPartida = construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
+        LocalDateTime dataHoraPartida = PublisherUtils.construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
         
         entity.setDataHoraPartida(dataHoraPartida);
         
@@ -161,19 +159,5 @@ public class JogoMapper {
                 .map(this::toEntity).toList();
     }
 
-    /**
-     * Utilitário para construir LocalDateTime a partir de LocalDate e String de hora
-     */
-    private LocalDateTime construirDataHoraPartida(LocalDate dataPartida, String horaPartida) {
-        if (PublisherUtils.nuloOuVazio(dataPartida) || PublisherUtils.nuloOuVazio(horaPartida)) {
-            return null;
-        }
-        
-        try {
-            LocalTime hora = LocalTime.parse(horaPartida, DateTimeConstants.TIME_FORMAT);
-            return LocalDateTime.of(dataPartida, hora);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Erro ao converter data e hora da partida", e);
-        }
-    }
+    
 }
