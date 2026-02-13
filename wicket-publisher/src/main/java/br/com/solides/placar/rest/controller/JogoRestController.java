@@ -49,6 +49,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Slf4j
 public class JogoRestController extends BaseRestController {
 
+    // Constantes de mensagens de API
+    private static final String MSG_API_JOGO_NAO_ENCONTRADO = "Jogo não encontrado";
+    private static final String MSG_API_ERRO_INTERNO = "Erro interno do servidor";
+
     @Inject
     private JogoService jogoService;
 
@@ -71,7 +75,7 @@ public class JogoRestController extends BaseRestController {
                 schema = @Schema(type = SchemaType.ARRAY, implementation = JogoDTO.class)
             )
         ),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response listarJogos(
             @Parameter(description = "Nome do Time A para filtrar") @QueryParam("timeA") String timeA,
@@ -115,8 +119,8 @@ public class JogoRestController extends BaseRestController {
                 schema = @Schema(implementation = JogoDTO.class)
             )
         ),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response buscarJogo(
             @Parameter(description = "ID único do jogo", required = true) 
@@ -149,7 +153,7 @@ public class JogoRestController extends BaseRestController {
             )
         ),
         @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response criarJogo(
             @Parameter(description = "Dados para criação do jogo", required = true)
@@ -183,8 +187,8 @@ public class JogoRestController extends BaseRestController {
             )
         ),
         @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response atualizarJogo(
             @Parameter(description = "ID único do jogo", required = true)
@@ -215,8 +219,8 @@ public class JogoRestController extends BaseRestController {
     )
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Jogo deletado com sucesso"),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response deletarJogo(
             @Parameter(description = "ID único do jogo", required = true)
@@ -251,8 +255,8 @@ public class JogoRestController extends BaseRestController {
             )
         ),
         @APIResponse(responseCode = "400", description = "Jogo não pode ser iniciado no status atual"),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response iniciarJogo(
             @Parameter(description = "ID único do jogo", required = true)
@@ -287,8 +291,8 @@ public class JogoRestController extends BaseRestController {
             )
         ),
         @APIResponse(responseCode = "400", description = "Jogo não pode ser finalizado no status atual"),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response finalizarJogo(
             @Parameter(description = "ID único do jogo", required = true)
@@ -323,8 +327,8 @@ public class JogoRestController extends BaseRestController {
             )
         ),
         @APIResponse(responseCode = "400", description = "Dados do placar inválidos ou jogo não está em andamento"),
-        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "404", description = MSG_API_JOGO_NAO_ENCONTRADO),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
     public Response atualizarPlacar(
             @Parameter(description = "ID único do jogo", required = true)
@@ -352,10 +356,10 @@ public class JogoRestController extends BaseRestController {
         description = "Verifica se o serviço de jogos está funcionando corretamente"
     )
     @APIResponses({
-        @APIResponse(responseCode = "200", description = "Serviço funcionando corretamente"),
-        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "200", description = "Serviço operacional"),
+        @APIResponse(responseCode = "500", description = MSG_API_ERRO_INTERNO)
     })
-    public Response healthCheck() {
+    public Response health() {
         return executeWithExceptionHandling(() -> {
             log.debug("REST - Health check");
             

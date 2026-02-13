@@ -22,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
 
+    // Constantes de mensagens
+    private static final String MSG_RECURSO_NAO_ENCONTRADO = "Recurso não encontrado";
+
     @Override
     public Response toResponse(Exception exception) {
         log.error("Exceção capturada pelo GlobalExceptionMapper: {}", exception.getMessage(), exception);
@@ -46,7 +49,7 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
             status = Response.Status.BAD_REQUEST;
             
         } else if (exception instanceof jakarta.ws.rs.NotFoundException) {
-            response = createErrorResponse("Recurso não encontrado", 404);
+            response = createErrorResponse(MSG_RECURSO_NAO_ENCONTRADO, 404);
             status = Response.Status.NOT_FOUND;
             
         } else if (exception instanceof jakarta.ws.rs.BadRequestException) {
