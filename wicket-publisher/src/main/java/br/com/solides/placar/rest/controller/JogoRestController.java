@@ -25,6 +25,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 /**
  * Controlador REST para operações com jogos.
  * Fornece endpoints para CRUD e operações específicas de jogos.
@@ -36,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Path("/api/v1/jogos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Tag(name = "Jogos", description = "Operações relacionadas ao gerenciamento de jogos")
 @Slf4j
 public class JogoRestController extends BaseRestController {
 
@@ -48,12 +58,27 @@ public class JogoRestController extends BaseRestController {
      * GET /api/v1/jogos?timeA=Flamengo&status=EM_ANDAMENTO
      */
     @GET
+    @Operation(
+        summary = "Listar jogos",
+        description = "Lista todos os jogos ou aplica filtros específicos"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Lista de jogos retornada com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(type = SchemaType.ARRAY, implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response listarJogos(
-            @QueryParam("timeA") String timeA,
-            @QueryParam("timeB") String timeB,
-            @QueryParam("status") StatusJogo status,
-            @QueryParam("dataInicio") String dataInicio,
-            @QueryParam("dataFim") String dataFim) {
+            @Parameter(description = "Nome do Time A para filtrar") @QueryParam("timeA") String timeA,
+            @Parameter(description = "Nome do Time B para filtrar") @QueryParam("timeB") String timeB,
+            @Parameter(description = "Status do jogo para filtrar") @QueryParam("status") StatusJogo status,
+            @Parameter(description = "Data de início (formato: yyyy-MM-dd)") @QueryParam("dataInicio") String dataInicio,
+            @Parameter(description = "Data de fim (formato: yyyy-MM-dd)") @QueryParam("dataFim") String dataFim) {
         
         return executeWithExceptionHandling(() -> {
             log.info("REST - Listando jogos com filtros: timeA={}, timeB={}, status={}", timeA, timeB, status);
@@ -77,7 +102,25 @@ public class JogoRestController extends BaseRestController {
      */
     @GET
     @Path("/{id}")
-    public Response buscarJogo(@PathParam("id") @NotNull Long id) {
+    @Operation(
+        summary = "Buscar jogo por ID",
+        description = "Busca um jogo específico pelo seu identificador único"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Jogo encontrado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response buscarJogo(
+            @Parameter(description = "ID único do jogo", required = true) 
+            @PathParam("id") @NotNull Long id) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Buscando jogo por ID: {}", id);
             
@@ -92,7 +135,25 @@ public class JogoRestController extends BaseRestController {
      * POST /api/v1/jogos
      */
     @POST
-    public Response criarJogo(@Valid @NotNull CriarJogoDTO criarJogoDTO) {
+    @Operation(
+        summary = "Criar novo jogo",
+        description = "Cria um novo jogo com os dados fornecidos"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "201",
+            description = "Jogo criado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response criarJogo(
+            @Parameter(description = "Dados para criação do jogo", required = true)
+            @Valid @NotNull CriarJogoDTO criarJogoDTO) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Criando novo jogo: {} vs {}", criarJogoDTO.getTimeA(), criarJogoDTO.getTimeB());
             
@@ -108,7 +169,28 @@ public class JogoRestController extends BaseRestController {
      */
     @PUT
     @Path("/{id}")
-    public Response atualizarJogo(@PathParam("id") @NotNull Long id, @Valid @NotNull JogoDTO jogoDTO) {
+    @Operation(
+        summary = "Atualizar jogo",
+        description = "Atualiza os dados de um jogo existente"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Jogo atualizado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response atualizarJogo(
+            @Parameter(description = "ID único do jogo", required = true)
+            @PathParam("id") @NotNull Long id, 
+            @Parameter(description = "Dados atualizados do jogo", required = true)
+            @Valid @NotNull JogoDTO jogoDTO) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Atualizando jogo ID: {}", id);
             
@@ -127,7 +209,18 @@ public class JogoRestController extends BaseRestController {
      */
     @DELETE
     @Path("/{id}")
-    public Response deletarJogo(@PathParam("id") @NotNull Long id) {
+    @Operation(
+        summary = "Deletar jogo",
+        description = "Remove um jogo do sistema"
+    )
+    @APIResponses({
+        @APIResponse(responseCode = "200", description = "Jogo deletado com sucesso"),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response deletarJogo(
+            @Parameter(description = "ID único do jogo", required = true)
+            @PathParam("id") @NotNull Long id) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Deletando jogo ID: {}", id);
             
@@ -143,7 +236,27 @@ public class JogoRestController extends BaseRestController {
      */
     @POST
     @Path("/{id}/iniciar")
-    public Response iniciarJogo(@PathParam("id") @NotNull Long id) {
+    @Tag(name = "Placar")
+    @Operation(
+        summary = "Iniciar jogo",
+        description = "Altera o status do jogo de NAO_INICIADO para EM_ANDAMENTO"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Jogo iniciado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "400", description = "Jogo não pode ser iniciado no status atual"),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response iniciarJogo(
+            @Parameter(description = "ID único do jogo", required = true)
+            @PathParam("id") @NotNull Long id) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Iniciando jogo ID: {}", id);
             
@@ -159,7 +272,27 @@ public class JogoRestController extends BaseRestController {
      */
     @POST
     @Path("/{id}/finalizar")
-    public Response finalizarJogo(@PathParam("id") @NotNull Long id) {
+    @Tag(name = "Placar")
+    @Operation(
+        summary = "Finalizar jogo",
+        description = "Altera o status do jogo de EM_ANDAMENTO para FINALIZADO"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Jogo finalizado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "400", description = "Jogo não pode ser finalizado no status atual"),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response finalizarJogo(
+            @Parameter(description = "ID único do jogo", required = true)
+            @PathParam("id") @NotNull Long id) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Finalizando jogo ID: {}", id);
             
@@ -175,8 +308,29 @@ public class JogoRestController extends BaseRestController {
      */
     @PUT
     @Path("/{id}/placar")
-    public Response atualizarPlacar(@PathParam("id") @NotNull Long id, 
-                                   @Valid @NotNull AtualizarPlacarRequest request) {
+    @Tag(name = "Placar")
+    @Operation(
+        summary = "Atualizar placar",
+        description = "Atualiza o placar de um jogo em andamento"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Placar atualizado com sucesso",
+            content = @Content(
+                mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JogoDTO.class)
+            )
+        ),
+        @APIResponse(responseCode = "400", description = "Dados do placar inválidos ou jogo não está em andamento"),
+        @APIResponse(responseCode = "404", description = "Jogo não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response atualizarPlacar(
+            @Parameter(description = "ID único do jogo", required = true)
+            @PathParam("id") @NotNull Long id, 
+            @Parameter(description = "Dados do novo placar", required = true)
+            @Valid @NotNull AtualizarPlacarRequest request) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Atualizando placar do jogo ID: {} - {} x {}", 
                 id, request.getPlacarA(), request.getPlacarB());
@@ -193,6 +347,14 @@ public class JogoRestController extends BaseRestController {
      */
     @GET
     @Path("/health")
+    @Operation(
+        summary = "Health Check",
+        description = "Verifica se o serviço de jogos está funcionando corretamente"
+    )
+    @APIResponses({
+        @APIResponse(responseCode = "200", description = "Serviço funcionando corretamente"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response healthCheck() {
         return executeWithExceptionHandling(() -> {
             log.debug("REST - Health check");

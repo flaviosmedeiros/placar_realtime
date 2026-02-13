@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Placar Realtime - Swagger UI</title>
+    <link rel="stylesheet" href="../webjars/swagger-ui/5.17.14/swagger-ui.css">
+    <style>
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+
+    <script src="../webjars/swagger-ui/5.17.14/swagger-ui-bundle.js"></script>
+    <script src="../webjars/swagger-ui/5.17.14/swagger-ui-standalone-preset.js"></script>
+    <script>
+        (async function () {
+            const pathSegments = window.location.pathname.split("/").filter(Boolean);
+            const contextPath = pathSegments.length > 0 ? "/" + pathSegments[0] : "";
+            const base = window.location.origin + contextPath;
+
+            const candidates = [
+                base + "/openapi",
+                base + "/api/openapi",
+                base + "/rest/openapi",
+                new URL("./openapi.yaml", window.location.href).toString()
+            ];
+
+            let detectedUrl = candidates[0];
+            for (const candidate of candidates) {
+                try {
+                    const response = await fetch(candidate, {
+                        method: "GET",
+                        headers: { "Accept": "application/json, application/yaml, text/yaml, */*" }
+                    });
+                    if (response.ok) {
+                        detectedUrl = candidate;
+                        break;
+                    }
+                } catch (_) {
+                    // tenta o proximo candidato
+                }
+            }
+
+            window.ui = SwaggerUIBundle({
+                url: detectedUrl,
+                dom_id: "#swagger-ui",
+                deepLinking: true,
+                displayRequestDuration: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                layout: "StandaloneLayout"
+            });
+        })();
+    </script>
+</body>
+</html>

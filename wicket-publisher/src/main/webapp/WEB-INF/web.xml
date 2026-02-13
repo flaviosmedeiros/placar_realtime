@@ -28,6 +28,10 @@
             <param-name>applicationClassName</param-name>
             <param-value>br.com.solides.placar.wicket.WicketPublisherApplication</param-value>
         </init-param>
+        <init-param>
+            <param-name>ignorePaths</param-name>
+            <param-value>/swagger-ui,/webjars,/openapi,/api,/rest</param-value>
+        </init-param>
     </filter>
 
     <filter-mapping>

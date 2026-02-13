@@ -1,0 +1,244 @@
+openapi: 3.0.3
+info:
+  title: Placar Realtime API
+  version: 1.0.0
+  description: API REST para gerenciamento de jogos e placar em tempo real.
+servers:
+  - url: /wicket-publisher/rest
+    description: Servidor local
+tags:
+  - name: Jogos
+    description: Operacoes de jogos
+  - name: Placar
+    description: Operacoes de placar
+paths:
+  /api/v1/jogos:
+    get:
+      tags: [Jogos]
+      summary: Listar jogos
+      parameters:
+        - in: query
+          name: timeA
+          schema: { type: string }
+        - in: query
+          name: timeB
+          schema: { type: string }
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/StatusJogo'
+      responses:
+        '200':
+          description: Lista de jogos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogoList'
+    post:
+      tags: [Jogos]
+      summary: Criar jogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarJogoDTO'
+      responses:
+        '201':
+          description: Jogo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+  /api/v1/jogos/{id}:
+    get:
+      tags: [Jogos]
+      summary: Buscar jogo por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Jogo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+        '404':
+          description: Nao encontrado
+    put:
+      tags: [Jogos]
+      summary: Atualizar jogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JogoDTO'
+      responses:
+        '200':
+          description: Jogo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+    delete:
+      tags: [Jogos]
+      summary: Deletar jogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Jogo deletado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+  /api/v1/jogos/{id}/iniciar:
+    post:
+      tags: [Placar]
+      summary: Iniciar jogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Jogo iniciado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+  /api/v1/jogos/{id}/finalizar:
+    post:
+      tags: [Placar]
+      summary: Finalizar jogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Jogo finalizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+  /api/v1/jogos/{id}/placar:
+    put:
+      tags: [Placar]
+      summary: Atualizar placar
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarPlacarRequest'
+      responses:
+        '200':
+          description: Placar atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJogo'
+  /api/v1/jogos/health:
+    get:
+      tags: [Jogos]
+      summary: Health check
+      responses:
+        '200':
+          description: Servico funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseString'
+components:
+  schemas:
+    StatusJogo:
+      type: string
+      enum: [NAO_INICIADO, EM_ANDAMENTO, FINALIZADO]
+    CriarJogoDTO:
+      type: object
+      required: [timeA, timeB]
+      properties:
+        timeA: { type: string }
+        timeB: { type: string }
+        dataPartida: { type: string, format: date }
+        horaPartida: { type: string, example: "20:00" }
+    AtualizarPlacarRequest:
+      type: object
+      required: [placarA, placarB]
+      properties:
+        placarA: { type: integer, format: int32, minimum: 0 }
+        placarB: { type: integer, format: int32, minimum: 0 }
+    JogoDTO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        timeA: { type: string }
+        timeB: { type: string }
+        placarA: { type: integer, format: int32 }
+        placarB: { type: integer, format: int32 }
+        status:
+          $ref: '#/components/schemas/StatusJogo'
+        dataPartida: { type: string, format: date }
+        horaPartida: { type: string }
+        tempoDeJogo: { type: integer, format: int32 }
+        dataHoraEncerramento: { type: string, format: date-time, nullable: true }
+        dataCriacao: { type: string, format: date-time, nullable: true }
+        dataAtualizacao: { type: string, format: date-time, nullable: true }
+    ApiResponseBase:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        statusCode: { type: integer, format: int32 }
+        timestamp: { type: string, format: date-time }
+        path: { type: string, nullable: true }
+    ApiResponseJogo:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/JogoDTO'
+    ApiResponseJogoList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/JogoDTO'
+    ApiResponseString:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: string
+    ApiResponseVoid:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              nullable: true

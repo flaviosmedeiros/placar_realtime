@@ -115,7 +115,7 @@ public abstract class BaseRestController {
     /**
      * Executa operação com tratamento de exceções
      */
-    protected Response executeWithExceptionHandling(Operation operation) {
+    protected Response executeWithExceptionHandling(ControllerAction operation) {
         try {
             return operation.execute();
         } catch (Exception e) {
@@ -127,7 +127,7 @@ public abstract class BaseRestController {
      * Interface funcional para operações
      */
     @FunctionalInterface
-    protected interface Operation {
+    protected interface ControllerAction {
         Response execute() throws Exception;
     }
 }
