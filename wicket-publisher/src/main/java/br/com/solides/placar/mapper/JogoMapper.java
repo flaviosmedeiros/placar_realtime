@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import br.com.solides.placar.entity.Jogo;
+import br.com.solides.placar.shared.dto.AtualizarJogoDTO;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
@@ -113,6 +114,32 @@ public class JogoMapper {
      * Atualiza Entity existente com dados do DTO
      */
     public void updateEntity(Jogo entity, JogoDTO dto) {
+        if (entity == null || dto == null) {
+            return;
+        }
+
+        entity.setTimeA(dto.getTimeA());
+        entity.setTimeB(dto.getTimeB());
+        entity.setPlacarA(dto.getPlacarA());
+        entity.setPlacarB(dto.getPlacarB());
+        entity.setStatus(dto.getStatus());
+        entity.setDataAtualizacao(LocalDateTime.now());
+        
+        // Atualizar dataHoraPartida
+        LocalDateTime dataHoraPartida = PublisherUtils.construirDataHoraPartida(dto.getDataPartida(), dto.getHoraPartida());
+        
+        entity.setDataHoraPartida(dataHoraPartida);
+        
+        // dataHoraEncerramento só é atualizado quando o jogo é finalizado
+        if (dto.getStatus() == StatusJogo.FINALIZADO && PublisherUtils.nuloOuVazio(entity.getDataHoraEncerramento())) {
+            entity.setDataHoraEncerramento(LocalDateTime.now());
+        }
+    }
+    
+    /**
+     * Atualiza Entity existente com dados do AtualizarJogoDTO
+     */
+    public void updateEntity(Jogo entity, AtualizarJogoDTO dto) {
         if (entity == null || dto == null) {
             return;
         }

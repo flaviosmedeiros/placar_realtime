@@ -2,8 +2,18 @@ package br.com.solides.placar.rest.controller;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import br.com.solides.placar.rest.dto.AtualizarPlacarRequest;
 import br.com.solides.placar.service.JogoService;
+import br.com.solides.placar.shared.dto.AtualizarJogoDTO;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.dto.JogoFilterDTO;
@@ -24,15 +34,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 /**
  * Controlador REST para operações com jogos.
@@ -183,7 +184,7 @@ public class JogoRestController extends BaseRestController {
             description = "Jogo atualizado com sucesso",
             content = @Content(
                 mediaType = MediaType.APPLICATION_JSON,
-                schema = @Schema(implementation = JogoDTO.class)
+                schema = @Schema(implementation = AtualizarJogoDTO.class)
             )
         ),
         @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
@@ -194,14 +195,14 @@ public class JogoRestController extends BaseRestController {
             @Parameter(description = "ID único do jogo", required = true)
             @PathParam("id") @NotNull Long id, 
             @Parameter(description = "Dados atualizados do jogo", required = true)
-            @Valid @NotNull JogoDTO jogoDTO) {
+            @Valid @NotNull AtualizarJogoDTO atualizaDTO) {
         return executeWithExceptionHandling(() -> {
             log.info("REST - Atualizando jogo ID: {}", id);
             
             // Garantir que o ID do path seja usado
-            jogoDTO.setId(id);
+            atualizaDTO.setId(id);
             
-            JogoDTO jogoAtualizado = jogoService.atualizarJogo(jogoDTO);
+            JogoDTO jogoAtualizado = jogoService.atualizarJogo(atualizaDTO);
             
             return success(jogoAtualizado, "Jogo atualizado com sucesso");
         });

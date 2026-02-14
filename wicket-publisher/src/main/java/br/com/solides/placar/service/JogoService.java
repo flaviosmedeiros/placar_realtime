@@ -13,6 +13,7 @@ import br.com.solides.placar.event.internal.JogoIniciadoEvent;
 import br.com.solides.placar.event.internal.PlacarAtualizadoInternalEvent;
 import br.com.solides.placar.mapper.JogoMapper;
 import br.com.solides.placar.repository.JogoRepository;
+import br.com.solides.placar.shared.dto.AtualizarJogoDTO;
 import br.com.solides.placar.shared.dto.CriarJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.dto.JogoFilterDTO;
@@ -111,7 +112,7 @@ public class JogoService {
      * Atualiza jogo existente
      */
     @Transactional
-    public JogoDTO atualizarJogo(@Valid @NotNull JogoDTO jogoDTO) {
+    public JogoDTO atualizarJogo(@Valid @NotNull AtualizarJogoDTO jogoDTO) {
         log.info("Atualizando jogo ID: {}", jogoDTO.getId());
         
         // Verificar se jogo existe
@@ -135,6 +136,8 @@ public class JogoService {
         
         return jogoAtualizadoDTO;
     }
+    
+    
 
     /**
      * Remove jogo por ID
@@ -285,7 +288,7 @@ public class JogoService {
     }
 
     
-    private void validarAtualizacaoJogo(JogoDTO jogoDTO, Jogo jogoExistente) {
+    private void validarAtualizacaoJogo(AtualizarJogoDTO jogoDTO, Jogo jogoExistente) {
         // Não permitir alterar jogo finalizado
         if (jogoExistente.getStatus() == StatusJogo.FINALIZADO) {
             throw BusinessException.jogoJaFinalizado(jogoExistente.getId());

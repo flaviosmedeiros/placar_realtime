@@ -20,6 +20,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 
 import br.com.solides.placar.service.JogoService;
+import br.com.solides.placar.shared.dto.AtualizarJogoDTO;
 import br.com.solides.placar.shared.dto.JogoDTO;
 import br.com.solides.placar.shared.enums.StatusJogo;
 import jakarta.inject.Inject;
@@ -138,7 +139,7 @@ public class EditarJogoModal extends Panel {
 					log.info("Atualizando jogo ID: {}", formData.getId());
 
 					// Converter form data para DTO
-					JogoDTO jogoDTO = formData.toJogoDTO();
+					AtualizarJogoDTO jogoDTO = formData.atualizarJogoDTO();
 
 					// Atualizar jogo via service
 					JogoDTO jogoAtualizado = jogoService.atualizarJogo(jogoDTO);
@@ -231,10 +232,13 @@ public class EditarJogoModal extends Panel {
 			return form;
 		}
 
-		public JogoDTO toJogoDTO() {
+		public AtualizarJogoDTO atualizarJogoDTO() {
 			try {
 
-				return JogoDTO.builder().id(id).timeA(timeA).timeB(timeB)
+				return AtualizarJogoDTO.builder()
+						.id(id)
+						.timeA(timeA)
+						.timeB(timeB)
 						.placarA(0).placarB(0)
 						.status(StatusJogo.NAO_INICIADO)
 						.dataPartida(dataPartida).horaPartida(horaPartidaStr)
