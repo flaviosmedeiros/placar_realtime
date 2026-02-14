@@ -21,11 +21,14 @@ export class GameSseService {
     inicio: '/sse/games/inicio',
     placar: '/sse/games/placar',
     encerrado: '/sse/games/encerrado',
-    excluido: '/sse/games/exclusao'
+    excluido: '/sse/games/excluido'
   };
   private sources: EventSource[] = [];
 
+
   constructor(private readonly zone: NgZone) { }
+
+
 
   connect(handlers: GameSseHandlers): void {
     this.close();
@@ -44,14 +47,12 @@ export class GameSseService {
     this.sources = [];
   }
 
-  private createSource(
-    channel: string,
-    endpoint: string,
-    handler: (update: game) => void,
-    onError?: (event: Event) => void
-  ): EventSource {
+  private createSource(channel: string, endpoint: string, handler: (update: game) => void, 
+      onError?: (event: Event) => void): EventSource {
+
     const url = `${this.apiBaseUrl}${endpoint}`;
     const source = new EventSource(url);
+
     const handleMessage = (event: MessageEvent) => {
       const update = this.parseUpdate(event.data);
       if (!update) {
@@ -59,7 +60,8 @@ export class GameSseService {
         return;
       }
 
-      console.info(`[SSE:${channel}] evento recebido`, update);
+      console.info(`[SSE:${channel}] evento recebido`, JSON.stringify(update));
+
       this.zone.run(() => handler(update));
     };
 
