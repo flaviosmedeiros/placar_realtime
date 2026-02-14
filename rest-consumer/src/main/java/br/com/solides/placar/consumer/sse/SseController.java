@@ -70,6 +70,16 @@ public class SseController {
         logger.info("SSE subscribeEncerrado endpoint called");
         return sseHub.register("encerrado");
     }
+    
+    @GetMapping(value = "${app.sse.endpoints.excluido}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "Assinar eventos de jogos excluidos", description = "Abre stream SSE no canal 'excluido'.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Stream SSE iniciado", content = @Content(mediaType = MediaType.TEXT_EVENT_STREAM_VALUE, schema = @Schema(implementation = PlacarAtualizadoEvent.class)))
+    })
+    public SseEmitter subscribeExcluido() {
+        logger.info("SSE subscribeEncerrado endpoint called");
+        return sseHub.register("excluido");
+    }
 
     @GetMapping(path = "/status")
     @Operation(summary = "Consultar status dos canais SSE", description = "Retorna quantidade de conexoes ativas por canal.")
