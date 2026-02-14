@@ -1,7 +1,10 @@
 package br.com.solides.placar.rest.config;
 
+import br.com.solides.placar.rest.controller.JogoRestController;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import java.util.Set;
+import java.util.HashSet;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
@@ -50,6 +53,16 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 )
 public class RestApplication extends Application {
     
-    // A configuração padrão do Jakarta EE irá descobrir automaticamente
-    // todos os recursos REST anotados com @Path
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> classes = new HashSet<>();
+        
+        // Registrar recursos REST explicitamente
+        classes.add(JogoRestController.class);
+        
+        // Registrar providers explicitamente 
+        classes.add(JsonbConfigurationProvider.class);
+        
+        return classes;
+    }
 }

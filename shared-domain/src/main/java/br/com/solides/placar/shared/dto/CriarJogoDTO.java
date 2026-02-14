@@ -5,9 +5,9 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -18,15 +18,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @since 1.0.0
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(
     name = "CriarJogoDTO", 
     description = "Dados necessários para criar um novo jogo"
 )
-public class CriarJogoDTO implements Serializable {
-    
+public class CriarJogoDTO implements Serializable {    
     private static final long serialVersionUID = 1L;
 
     /**

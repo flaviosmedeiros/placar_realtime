@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.json.bind.annotation.JsonbDateFormat;
 
 import br.com.solides.placar.shared.enums.StatusJogo;
 import jakarta.validation.constraints.Min;
@@ -99,6 +100,7 @@ public class JogoDTO implements Serializable {
      * Data e hora de encerramento do jogo (quando status = FINALIZADO)
      */
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Data e hora de encerramento do jogo", example = "2026-02-12T22:30:00", format = "date-time")
     private LocalDateTime dataHoraEncerramento;
 
@@ -106,6 +108,7 @@ public class JogoDTO implements Serializable {
      * Data de criação do registro
      */
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Data de criação do registro", example = "2026-02-12T18:00:00", format = "date-time", readOnly = true)
     private LocalDateTime dataCriacao;
 
@@ -113,6 +116,7 @@ public class JogoDTO implements Serializable {
      * Data da última atualização
      */
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Data da última atualização", example = "2026-02-12T20:45:00", format = "date-time", readOnly = true)
     private LocalDateTime dataAtualizacao;
 }

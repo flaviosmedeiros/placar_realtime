@@ -1,6 +1,8 @@
 package br.com.solides.placar.shared.dto;
 
 import br.com.solides.placar.shared.enums.StatusJogo;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.json.bind.annotation.JsonbDateFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,11 +59,15 @@ public class JogoFilterDTO implements Serializable {
     /**
      * Filtro por data/hora da partida - início do período
      */
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dataHoraPartidaInicio;
 
     /**
      * Filtro por data/hora da partida - fim do período
      */
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dataHoraPartidaFim;
 
     /**

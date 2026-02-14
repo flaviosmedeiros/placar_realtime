@@ -23,8 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
     name = "AtualizarPlacarRequest",
     description = "Dados para atualização do placar de um jogo"
 )
-public class AtualizarPlacarRequest implements Serializable {
-    
+public class AtualizarPlacarRequest implements Serializable {    
     private static final long serialVersionUID = 1L;
 
     /**
