@@ -1,0 +1,151 @@
+services:
+  # PostgreSQL 15 - Banco de dados principal
+  postgres:
+    image: postgres:15-alpine
+    container_name: placar-postgres
+    environment:
+      POSTGRES_DB: placar_db
+      POSTGRES_USER: placar_user
+      POSTGRES_PASSWORD: placar_pass
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: America/Sao_Paulo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placar_user -d placar_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 7 - Cache distribuído
+  redis:
+    image: redis:7-alpine
+    container_name: placar-redis
+    environment:
+      TZ: America/Sao_Paulo
+    command: redis-server --appendonly yes --requirepass redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ 3.12 - Message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: placar-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+      RABBITMQ_DEFAULT_VHOST: my_vhost
+      TZ: America/Sao_Paulo
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # Payara Server 6 - Servidor de aplicação Jakarta EE
+  payara:
+    image: payara/server-full:6.2023.5-jdk17
+    container_name: placar-payara
+    environment:
+      PAYARA_ADMIN_USER: admin
+      PAYARA_ADMIN_PASSWORD: root
+      PAYARA_DOMAIN_NAME: domain1
+      TZ: America/Sao_Paulo
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8080:8080"
+      - "4848:4848"
+    volumes:
+      - payara_domain_data:/opt/payara/appserver/glassfish/domains
+      - ./payara/deployments:/opt/payara/deployments
+      - ./payara/lib/postgresql-42.7.1.jar:/opt/payara/appserver/glassfish/lib/postgresql-42.7.1.jar:ro
+      - ./payara-init.sh:/docker-entrypoint.sh:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: ["/docker-entrypoint.sh"]
+    networks:
+      - placar-network
+
+  # REST Consumer - Aplicação Spring Boot
+  rest-consumer:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: placar-rest-consumer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Sobrescrever configurações do application.yaml para ambiente Docker
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: redis_pass
+      TZ: America/Sao_Paulo
+      # Java options para tunning de memória
+      JAVA_OPTS: "-Xms256m -Xmx512m -Duser.timezone=America/Sao_Paulo"
+    ports:
+      - "8585:8585"
+    volumes:
+      - ../rest-consumer/target/rest-consumer-1.0.0-SNAPSHOT.jar:/app/rest-consumer.jar:ro
+      - /etc/localtime:/etc/localtime:ro
+    working_dir: /app
+    command: sh -c "apk add --no-cache curl && java $$JAVA_OPTS -jar rest-consumer.jar"
+    networks:
+      - placar-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8585/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  placar-network:
+    driver: bridge
+    name: placar-network
+
+volumes:
+  postgres_data:
+    name: placar-postgres-data
+  redis_data:
+    name: placar-redis-data
+  rabbitmq_data:
+    name: placar-rabbitmq-data
+  rabbitmq_log:
+    name: placar-rabbitmq-log
+  payara_domain_data:
+    name: placar-payara-domain

@@ -1,0 +1,169 @@
+<div class="app">
+  <header class="hero">
+    <div class="hero-copy">
+      <h1>Games Realtime</h1>
+      <p class="subtitle">
+        Acompanhe partidas em tempo real com atualizacoes vindas da API Java via SSE.
+      </p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-label">Novos</span>
+        <span class="stat-value">{{ jogosNovos().length }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Em andamento</span>
+        <span class="stat-value">{{ jogosEmAndamento().length }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Encerrados</span>
+        <span class="stat-value">{{ jogosEncerrados().length }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="boards">
+    <section class="board board--new">
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Nao iniciados</p>
+          <h2>Jogos novos</h2>
+        </div>
+        <span class="count">{{ jogosNovos().length }}</span>
+      </div>
+      <div class="board-body">
+        @if (jogosNovos().length === 0) {
+        <p class="empty">Nenhum jogo aguardando inicio.</p>
+        } @else {
+        <div class="cards">
+          @for (jogo of jogosNovos(); track jogo.id) {
+          <article class="game-card">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
+              </div>
+              <span class="status-badge status-badge--novo">{{ formatarStatus(jogo.status) }}</span>
+            </div>
+            <div class="score">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Inicio previsto</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
+              </div>
+            </div>
+          </article>
+          }
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="board board--live">
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Partidas ao vivo</p>
+          <h2>Jogos em andamento</h2>
+        </div>
+        <span class="count">{{ jogosEmAndamento().length }}</span>
+      </div>
+      <div class="board-body">
+        @if (jogosEmAndamento().length === 0) {
+        <p class="empty">Nenhuma partida em andamento.</p>
+        } @else {
+        <div class="cards">
+          @for (jogo of jogosEmAndamento(); track jogo.id) {
+          <article class="game-card game-card--live">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
+              </div>
+              <span class="status-badge status-badge--live">{{ formatarStatus(jogo.status) }}</span>
+            </div>
+            <div class="score score--live">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Tempo de jogo</span>
+                <span class="meta-value">{{ formatarTempoDeJogo(jogo) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Inicio</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraInicioPartida) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
+              </div>
+            </div>
+          </article>
+          }
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="board board--closed">
+      <div class="board-header">
+        <div>
+          <p class="board-kicker">Finalizados</p>
+          <h2>Jogos encerrados</h2>
+        </div>
+        <span class="count">{{ jogosEncerrados().length }}</span>
+      </div>
+      <div class="board-body">
+        @if (jogosEncerrados().length === 0) {
+        <p class="empty">Nenhuma partida encerrada.</p>
+        } @else {
+        <div class="cards">
+          @for (jogo of jogosEncerrados(); track jogo.id) {
+          <article class="game-card game-card--closed">
+            <div class="game-head">
+              <div class="teams">
+                <span class="team">{{ jogo.timeA }}</span>
+                <span class="versus">x</span>
+                <span class="team">{{ jogo.timeB }}</span>
+              </div>
+              <span class="status-badge status-badge--closed">{{ formatarStatus(jogo.status) }}</span>
+            </div>
+            <div class="score">
+              <span>{{ jogo.placarA }}</span>
+              <span class="score-divider">x</span>
+              <span>{{ jogo.placarB }}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Encerramento</span>
+                <span class="meta-value">{{ formatarData(jogo.dataHoraEncerramento) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Tempo total</span>
+                <span class="meta-value">{{ formatarTempoDeJogo(jogo) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ formatarStatus(jogo.status) }}</span>
+              </div>
+            </div>
+          </article>
+          }
+        </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

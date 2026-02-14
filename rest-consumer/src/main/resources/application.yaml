@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: consumer
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: root
+    password: root
+    virtual-host: my_vhost
+    listener:
+      simple:
+        acknowledge-mode: auto
+        default-requeue-rejected: false
+        missing-queues-fatal: false
+        concurrency: 2
+        max-concurrency: 8
+        prefetch: 50
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-interval: 10000
+          multiplier: 2.0
+          max-attempts: 5
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 16
+          max-idle: 8
+          min-idle: 0
+          max-wait: 2000ms
+
+logging:
+  level:
+    root: INFO
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      redis:
+        # Tamanho da janela deslizante para calcular taxa de falhas
+        slidingWindowSize: 100
+        # Número mínimo de chamadas antes de calcular taxa de falhas
+        minimumNumberOfCalls: 10
+        # Threshold de falhas para abrir o circuito (50%)
+        failureRateThreshold: 50
+        # Threshold de chamadas lentas para abrir o circuito (80%)
+        slowCallRateThreshold: 80
+        # Duração considerada como chamada lenta
+        slowCallDurationThreshold: 1s
+        # Tempo que o circuito permanece aberto antes de tentar half-open
+        waitDurationInOpenState: 30s
+        # Número de chamadas permitidas em half-open para testar recuperação
+        permittedNumberOfCallsInHalfOpenState: 5
+        # Habilitar transição automática de OPEN para HALF_OPEN
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        # Tipo de janela deslizante: COUNT_BASED ou TIME_BASED
+        slidingWindowType: COUNT_BASED
+        # Registrar eventos de saúde do circuit breaker
+        registerHealthIndicator: true
+        # Ignorar exceções que não devem abrir o circuito
+        ignoreExceptions:
+          - java.lang.IllegalArgumentException
+          - java.lang.NullPointerException
+  retry:
+    instances:
+      redis:
+        # Número máximo de tentativas (incluindo a primeira)
+        maxAttempts: 1
+        # Tempo de espera entre tentativas
+        waitDuration: 500ms
+        # Habilitar backoff exponencial
+        enableExponentialBackoff: true
+        # Multiplicador para backoff exponencial
+        exponentialBackoffMultiplier: 2
+        # Retry apenas em exceções específicas do Redis
+        retryExceptions:
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - org.springframework.data.redis.RedisSystemException
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: ${app.docs.enabled:true}
+    path: /consumer/api-docs
+  swagger-ui:
+    enabled: ${app.docs.enabled:true}
+    path: /consumer/swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+app:
+  docs:
+    enabled: true
+  rabbit:
+    exchange: games.topic
+    queue: games.partidas
+    routing: games.partidas
+    dlq:
+      exchange: games.dlq.topic
+      routing: games.dlq
+      queue: games.dlq.queue
+  sse:
+    heartbeat: 10000
+    allowed-origins:
+      - http://localhost:4200
+      - http://localhost:8585
+    endpoints:
+      novos: /novos
+      inicio: /inicio
+      placar: /placar
+      encerrado: /encerrado
+      excluido: /excluido
+    
+
+server:
+  port: 8585

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="placar-pu" transaction-type="JTA">
+        <description>Unidade de Persistência para Sistema de Placar Realtime</description>
+        
+        <!-- Datasource JNDI configurado no Payara -->
+        <jta-data-source>jdbc/placarDS</jta-data-source>
+        
+        <!-- Entidades do domínio -->
+        <class>br.com.solides.placar.entity.Jogo</class>
+        
+        <!-- Configurações do EclipseLink para DDL automático -->
+        <properties>
+            <!-- Dialeto PostgreSQL específico -->
+            <property name="eclipselink.target-database" value="PostgreSQL"/>
+            
+            <!-- Geração automática de DDL - EclipseLink -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+            <property name="eclipselink.create-ddl-jdbc-file-name" value="create-schema.sql"/>
+            <property name="eclipselink.drop-ddl-jdbc-file-name" value="drop-schema.sql"/>
+            
+            <!-- Schema padrão -->
+            <property name="eclipselink.default-schema" value="placar"/>
+            
+            <!-- Configurações de logging -->
+            <property name="eclipselink.logging.level" value="INFO"/>
+            <property name="eclipselink.logging.level.sql" value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
+            
+            <!-- Configurações de cache -->
+            <property name="eclipselink.cache.shared.default" value="false"/>
+            
+            <!-- Configurações de performance -->
+            <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
+            <property name="eclipselink.jdbc.cache-statements" value="true"/>
+            
+            <!-- Timezone para timestamps -->
+            <property name="eclipselink.temporal.mutable" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

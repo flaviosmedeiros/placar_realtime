@@ -1,0 +1,115 @@
+<wicket:panel>
+    <!-- Modal -->
+    <div class="modal fade" id="modalEditarJogo" tabindex="-1" aria-labelledby="modalEditarJogoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalEditarJogoLabel">
+                        <i class="bi bi-pencil-square"></i>
+                        Editar Jogo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form wicket:id="formEditarJogo">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- Time A -->
+                            <div class="col-md-6">
+                                <label for="timeA" class="form-label">
+                                    <i class="bi bi-shield-fill text-primary"></i>
+                                    Time A *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeA" 
+                                       required>
+                            </div>
+                            
+                            <!-- Time B -->
+                            <div class="col-md-6">
+                                <label for="timeB" class="form-label">
+                                    <i class="bi bi-shield-fill text-danger"></i>
+                                    Time B *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       wicket:id="timeB" 
+                                       required>
+                            </div>
+                            
+                            <!-- Placar A -->
+                            <div class="col-md-3">
+                                <label for="placarA" class="form-label">
+                                    <i class="bi bi-trophy text-primary"></i>
+                                    Placar A
+                                </label>
+                                <input type="number" class="form-control" wicket:id="placarA" min="0">
+                            </div>
+                            
+                            <!-- Placar B -->
+                            <div class="col-md-3">
+                                <label for="placarB" class="form-label">
+                                    <i class="bi bi-trophy text-danger"></i>
+                                    Placar B
+                                </label>
+                                <input type="number" class="form-control" wicket:id="placarB" min="0">
+                            </div>
+                            
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-flag text-info"></i>
+                                    Status *
+                                </label>
+                                <select class="form-select" wicket:id="status" required>
+                                    <option value="">Selecione o status</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Data e Hora da Partida -->
+                            <div class="col-md-6">
+                                <label for="dataPartidaStr" class="form-label">
+                                    <i class="bi bi-calendar3 text-success"></i>
+                                    Data da Partida *
+                                </label>
+                                <input class="form-control" 
+                                       wicket:id="dataPartida" required>
+                                <div class="form-text">Data prevista para o jogo</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="horaPartidaStr" class="form-label">
+                                    <i class="bi bi-clock text-success"></i>
+                                    Hora da Partida *
+                                </label>
+                                <input class="form-control" 
+                                       wicket:id="horaPartidaStr" required>
+                                <div class="form-text">Horário previsto para início do jogo</div>
+                            </div>
+                        </div>                        
+                        
+                    </div>
+                    
+                    <div class="modal-footer">
+                    	<div class="col-12 d-flex gap-3 justify-content-center">
+	                        <button type="button" 
+	                                class="btn btn-secondary" 
+	                                wicket:id="botaoCancelar"
+	                                data-bs-dismiss="modal">
+	                            <i class="bi bi-x-circle"></i>
+	                            Cancelar
+	                        </button>
+	                        <button type="submit" 
+	                                class="btn btn-success" 
+	                                wicket:id="botaoSalvar">
+	                            <i class="bi bi-check-circle"></i>
+	                            Salvar Alterações
+	                        </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</wicket:panel>
