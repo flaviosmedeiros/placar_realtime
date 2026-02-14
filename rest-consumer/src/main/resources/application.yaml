@@ -125,6 +125,7 @@ app:
       inicio: /inicio
       placar: /placar
       encerrado: /encerrado
+      excluido: /excluido
     
 
 server:

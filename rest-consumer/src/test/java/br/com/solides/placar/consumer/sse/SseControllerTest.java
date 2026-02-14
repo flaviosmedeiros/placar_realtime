@@ -75,6 +75,17 @@ class SseControllerTest {
     }
 
     @Test
+    void shouldSubscribeToExcluido() throws Exception {
+        when(sseHub.register("excluido")).thenReturn(new SseEmitter());
+
+        mockMvc.perform(get("/consumer/api/sse/games/excluido"))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        verify(sseHub).register("excluido");
+    }
+
+    @Test
     void shouldReturnStatus() throws Exception {
         Map<String, Integer> statusMap = new HashMap<>();
         statusMap.put("novos", 5);
