@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import br.com.solides.placar.entity.Jogo;
 import br.com.solides.placar.event.internal.JogoAtualizadoEvent;
 import br.com.solides.placar.event.internal.JogoCriadoEvent;
+import br.com.solides.placar.event.internal.JogoExcluidoEvent;
 import br.com.solides.placar.event.internal.JogoFinalizadoEvent;
 import br.com.solides.placar.event.internal.JogoIniciadoEvent;
 import br.com.solides.placar.event.internal.PlacarAtualizadoInternalEvent;
@@ -157,11 +158,16 @@ public class JogoService {
         // Validar se pode ser removido
         validarRemocaoJogo(jogo);
         
+        JogoDTO jogoDTO = jogoMapper.toDTO(jogo);
+        
         // Remover
         boolean removido = jogoRepository.deleteById(id);
         
         if (removido) {
             log.info("Jogo removido com sucesso, ID: {}", id);
+            jogoDTO.setStatus(StatusJogo.EXCLUIDO); // Marcar como excluído para o evento            
+            eventPublisher.publishEvent(new JogoExcluidoEvent(jogoDTO));           
+            
         } else {
             throw new BusinessException("Falha ao remover jogo com ID: " + id);
         }
