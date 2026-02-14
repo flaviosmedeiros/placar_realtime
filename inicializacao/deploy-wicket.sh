@@ -11,7 +11,6 @@ set -e
 # Verificar se o container está rodando
 if ! docker compose ps --status running payara >/dev/null 2>&1; then
   echo "❌ O container 'payara' não está em execução."
-  echo "   Execute: ./start-infrastructure.sh"
   exit 1
 fi
 
@@ -52,6 +51,3 @@ $ASADMIN deploy --force=true --name="$APP_NAME" --contextroot="/wicket-publisher
 
 echo ""
 echo "✅ Deploy automático concluído com sucesso!"
-echo ""
-echo "🔗 Aplicação disponível em: http://localhost:8080/wicket-publisher"
-echo ""

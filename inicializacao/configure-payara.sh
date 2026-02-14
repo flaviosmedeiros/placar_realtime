@@ -2,8 +2,7 @@
 # Script para configurar o Payara rodando no Docker Compose (JDBC + system properties)
 
 set -e
-echo "🔍 Aguardando payara...20 segundos"
-sleep 20
+
 cd "$(dirname "$0")"
 
 if ! docker compose ps payara >/dev/null 2>&1; then
@@ -13,7 +12,6 @@ fi
 
 if ! docker compose ps --status running payara >/dev/null 2>&1; then
   echo "⚠️  O container 'payara' não está em execução. Inicie a infraestrutura antes de configurar."
-  echo "   Sugestão: ./start-infrastructure.sh"
   exit 1
 fi
 
@@ -51,7 +49,7 @@ $ASADMIN create-system-properties \
   rabbitmq.host=rabbitmq:rabbitmq.port=5672:redis.host=redis:redis.port=6379
 
 echo "Ajustando níveis de log no Payara (DEBUG ~= FINE)..."
-$ASADMIN set-log-levels "br.com.solides=FINE:org.apache.wicket=FINE"
+$ASADMIN set-log-levels "br.com.solides=ALL:org.apache.wicket=INFO"
 
 echo "Log levels configurados:"
 $ASADMIN list-log-levels | grep -E "br.com.solides|org.apache.wicket" || true

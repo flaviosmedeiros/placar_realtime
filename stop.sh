@@ -4,12 +4,14 @@
 echo "🛑 Parando infraestrutura do Placar Realtime..."
 echo ""
 
-cd "$(dirname "$0")"
-
+cd inicializacao
 docker compose down
 
 echo ""
+echo "🛑 Removendo volumes (APAGA DADOS)..."
+docker compose down -v
+echo ""
+
 echo "✅ Infraestrutura parada com sucesso!"
 echo ""
-echo "📝 Para iniciar novamente: ./start-infrastructure.sh"
-echo "📝 Para remover volumes (APAGA DADOS): docker compose down -v"
+echo "📝 Para iniciar novamente: ./start.sh"
