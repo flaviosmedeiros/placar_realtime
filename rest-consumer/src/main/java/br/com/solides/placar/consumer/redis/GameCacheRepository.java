@@ -1,14 +1,16 @@
 package br.com.solides.placar.consumer.redis;
 
-import br.com.solides.placar.shared.event.PlacarAtualizadoEvent;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+
+import br.com.solides.placar.shared.event.PlacarAtualizadoEvent;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Repository
 public class GameCacheRepository {
@@ -87,6 +89,30 @@ public class GameCacheRepository {
         } catch (Exception ex) {
             logger.error("Unexpected error while finding game {} in Redis: {}", id, ex.getMessage(), ex);
             throw new RedisConnectionFailureException("Failed to retrieve game event from Redis", ex);
+        }
+    }
+
+    @CircuitBreaker(name = BACKEND_REDIS)
+    @Retry(name = BACKEND_REDIS)
+    public void deleteById(Long id) {
+        if (id == null) {
+            logger.warn("Attempted to delete game with null ID");
+            return;
+        }
+
+        try {
+            Boolean deleted = redisJsonTemplate.delete(buildKey(id));
+            if (Boolean.TRUE.equals(deleted)) {
+                logger.debug("Deleted game event from Redis: {}", id);
+            } else {
+                logger.debug("Game event not found in Redis for deletion: {}", id);
+            }
+        } catch (RedisConnectionFailureException ex) {
+            logger.error("Redis connection failed while deleting game {}: {}", id, ex.getMessage(), ex);
+            throw ex;
+        } catch (Exception ex) {
+            logger.error("Unexpected error while deleting game {} from Redis: {}", id, ex.getMessage(), ex);
+            throw new RedisConnectionFailureException("Failed to delete game event from Redis", ex);
         }
     }
 

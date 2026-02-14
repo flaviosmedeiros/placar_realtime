@@ -1,10 +1,8 @@
 package br.com.solides.placar.consumer.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -61,11 +59,10 @@ class GameCacheServiceTest {
     }
 
     @Test
-    void shouldReturnNullWhenIncomingEventIsNull() {
-        PlacarAtualizadoEvent result = cacheService.mergeWithCached(null);
+    void shouldDelegateDeleteByIdToRepository() {
+        cacheService.deleteById(7L);
 
-        assertNull(result);
-        verifyNoInteractions(cacheRepository);
+        verify(cacheRepository).deleteById(7L);
     }
 
     @Test
@@ -99,25 +96,25 @@ class GameCacheServiceTest {
     }
 
     @Test
-    void shouldReturnNullWhenCachedEventIsFinished() {
+    void shouldKeepCachedWhenCachedEventIsFinished() {
         PlacarAtualizadoEvent cached = PlacarAtualizadoEventFactory.finalizado(30L, 3, 2);
         PlacarAtualizadoEvent incoming = PlacarAtualizadoEventFactory.emAndamento(30L, 91, 4, 2);
         when(cacheRepository.findById(30L)).thenReturn(cached);
 
         PlacarAtualizadoEvent result = cacheService.mergeWithCached(incoming);
 
-        assertNull(result);
+        assertSame(cached, result);
     }
 
     @Test
-    void shouldReturnNullWhenIncomingIsOlderThanCached() {
+    void shouldKeepCachedWhenIncomingEventIsOlder() {
         PlacarAtualizadoEvent cached = PlacarAtualizadoEventFactory.emAndamento(40L, 35, 1, 1);
         PlacarAtualizadoEvent incoming = PlacarAtualizadoEventFactory.emAndamento(40L, 20, 2, 1);
         when(cacheRepository.findById(40L)).thenReturn(cached);
 
         PlacarAtualizadoEvent result = cacheService.mergeWithCached(incoming);
 
-        assertNull(result);
+        assertSame(cached, result);
     }
 
     @Test

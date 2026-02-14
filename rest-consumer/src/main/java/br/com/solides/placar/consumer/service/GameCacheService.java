@@ -51,6 +51,16 @@ public class GameCacheService {
         log.debug("Saving game event with TTL {}: {}", ttl, event.getId());
         cacheRepository.saveGameWithTtl(event, ttl);
     }
+    
+    /**
+     * Deletes a game event from the cache by its ID.
+     * 
+     * @param id the game event ID to delete
+     */
+    public void deleteById(Long id) {
+        log.debug("Deleting game event by id: {}", id);
+        cacheRepository.deleteById(id);
+    }
 
     /**
      * Merges an incoming game event with the cached version if it exists
@@ -60,12 +70,10 @@ public class GameCacheService {
      * @return the merged event to save, or the incoming event if no cached version
      *         exists
      */
-    public PlacarAtualizadoEvent mergeWithCached(PlacarAtualizadoEvent incomingEvent) {
-        if (Objects.isNull(incomingEvent)) {
-            return null;
-        }
-
+    public PlacarAtualizadoEvent mergeWithCached(PlacarAtualizadoEvent incomingEvent) {        
+    	
         try {
+        	
             PlacarAtualizadoEvent cachedEvent = findById(incomingEvent.getId());
 
             if (Objects.isNull(cachedEvent)) {
@@ -87,7 +95,7 @@ public class GameCacheService {
                 return cachedEvent;
             }
            
-           return null;
+           return cachedEvent;
             
         } catch (Exception ex) {
             log.warn("Failed to merge with cached event for id: {}. Using incoming event: {}", incomingEvent.getId(),

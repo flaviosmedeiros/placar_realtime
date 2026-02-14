@@ -1,7 +1,8 @@
 export enum GameStatus {
   NAO_INICIADO = 'NAO_INICIADO',
   EM_ANDAMENTO = 'EM_ANDAMENTO',
-  FINALIZADO = 'FINALIZADO'
+  FINALIZADO = 'FINALIZADO',
+  EXCLUIDO = 'EXCLUIDO'
 }
 
 export interface game {

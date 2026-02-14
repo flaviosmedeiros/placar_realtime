@@ -67,24 +67,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # pgAdmin 4 - Interface web para PostgreSQL (opcional)
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: placar-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@placar.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      TZ: America/Sao_Paulo
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - placar-network
-    depends_on:
-      - postgres
 
   # Payara Server 6 - Servidor de aplicação Jakarta EE
   payara:
@@ -165,7 +147,5 @@ volumes:
     name: placar-rabbitmq-data
   rabbitmq_log:
     name: placar-rabbitmq-log
-  pgadmin_data:
-    name: placar-pgadmin-data
   payara_domain_data:
     name: placar-payara-domain

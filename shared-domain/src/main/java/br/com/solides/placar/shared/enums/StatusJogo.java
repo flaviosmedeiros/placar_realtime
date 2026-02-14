@@ -29,5 +29,10 @@ public enum StatusJogo {
      * Jogo finalizado - não permite mais atualizações de placar
      */
     @Schema(description = "Jogo foi encerrado")
-    FINALIZADO
+    FINALIZADO,    
+    
+    
+    
+    @Schema(description = "Jogo foi cancelado")
+    EXCLUIDO
 }
