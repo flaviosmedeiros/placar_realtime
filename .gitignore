@@ -41,7 +41,6 @@ local.properties
 *.log
 *.ctxt
 .mtj.tmp/
-*.jar
 *.war
 *.nar
 *.ear
@@ -81,7 +80,6 @@ Thumbs.db
 
 # Logs e Databases
 *.log
-*.sql
 *.sqlite
 *.db
 
