@@ -9,6 +9,24 @@ DOMAIN_NAME="${PAYARA_DOMAIN_NAME:-domain1}"
 
 echo "🔧 Configurando Payara Server..."
 
+# Copiar driver PostgreSQL para o diretório lib do domínio
+# O bind mount em glassfish/lib/ é usado como origem pois o volume nomeado
+# payara_domain_data cobre todo o diretório /domains, tornando bind mounts
+# dentro dele ineficazes (silenciosamente ignorados pelo Docker).
+DRIVER_JAR="postgresql-42.7.1.jar"
+DRIVER_SRC="/opt/payara/appserver/glassfish/lib/${DRIVER_JAR}"
+DRIVER_DEST="/opt/payara/appserver/glassfish/domains/${DOMAIN_NAME}/lib/${DRIVER_JAR}"
+
+echo "📦 Copiando driver PostgreSQL para domain1/lib/..."
+if [ -f "${DRIVER_SRC}" ]; then
+    mkdir -p "$(dirname "${DRIVER_DEST}")"
+    cp "${DRIVER_SRC}" "${DRIVER_DEST}"
+    echo "✅ Driver copiado: ${DRIVER_JAR} → domains/${DOMAIN_NAME}/lib/"
+else
+    echo "❌ Driver não encontrado em ${DRIVER_SRC}. Verifique o volume mapeado no docker-compose.yml."
+    exit 1
+fi
+
 # Iniciar o domínio
 echo "🚀 Iniciando domínio ${DOMAIN_NAME}..."
 /opt/payara/appserver/bin/asadmin start-domain ${DOMAIN_NAME}

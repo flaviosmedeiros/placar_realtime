@@ -31,6 +31,10 @@ local.properties
 .texlipse
 .springBeans
 .sts4-cache
+.factorypath
+/rest-consumer/.factorypath
+/shared-domain/.factorypath
+/wicket-publisher/.factorypath
 
 # Java
 *.class

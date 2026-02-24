@@ -21,8 +21,8 @@ echo "📦 Iniciando containers..."
 docker compose up -d
 
 echo ""
-echo "⏳ Aguardando serviços ficarem prontos..."
-sleep 10
+echo "⏳ Aguardando serviços ficarem prontos...15 segundos"
+sleep 15
 
 # Verificar status dos containers
 echo ""
